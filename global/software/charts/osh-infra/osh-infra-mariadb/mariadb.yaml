@@ -1,0 +1,53 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: osh-infra-mariadb
+  name: osh-infra-mariadb
+  namespace: osh-infra
+spec:
+  chart_name: osh-infra-mariadb
+  dependencies:
+  - osh-helm-toolkit
+  install:
+    no_hooks: false
+  release: osh-infra-mariadb
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.mariadb)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-osh-infra-mariadb
+        type: job
+  values:
+    endpoints:
+      oslo_db:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.oslo_db.admin)
+            password: $(DeckhandPassphrase.osh-infra-oslo-db-admin-password.spec)
+          exporter:
+            password: $(DeckhandPassphrase.osh-infra-oslo-db-exporter-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.oslo_db)
+      prometheus_mysql_exporter:
+        auth:
+          user: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.prometheus_mysql_exporter.user)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.prometheus_mysql_exporter)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.mariadb)
+    labels:
+      prometheus_mysql_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: true
+  wait:
+    labels:
+      release_group: airship-osh-infra-mariadb
+    timeout: 900

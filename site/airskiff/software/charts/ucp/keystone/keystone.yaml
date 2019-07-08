@@ -1,0 +1,11 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-keystone
+  namespace: ucp
+spec:
+  values:
+    pod:
+      replicas:
+        api: 1

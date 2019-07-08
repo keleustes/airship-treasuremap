@@ -1,0 +1,27 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockBootAction
+metadata:
+  labels:
+    application: drydock
+  name: promjoin-systemd-unit
+  namespace: drydock
+spec:
+  assets:
+  - data: |
+      [Unit]
+      Description=Promenade Initialization Service
+      After=network-online.target local-fs.target cloud-init.target
+      ConditionPathExists=!/var/lib/prom.done
+
+      [Service]
+      Type=oneshot
+      ExecStart=/opt/promjoin.sh
+
+      [Install]
+      WantedBy=airship.target
+    data_pipeline:
+    - utf8_decode
+    path: /etc/systemd/system/promjoin.service
+    permissions: "444"
+    type: unit
+  signaling: false

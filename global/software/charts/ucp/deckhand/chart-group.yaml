@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  labels:
+    name: ucp-deckhand-chart-group
+  name: ucp-deckhand
+  namespace: shipyard
+spec:
+  chart_group:
+  - ucp-barbican
+  - ucp-deckhand
+  description: Deckhand

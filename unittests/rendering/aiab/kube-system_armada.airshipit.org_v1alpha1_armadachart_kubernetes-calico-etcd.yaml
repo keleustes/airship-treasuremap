@@ -1,0 +1,77 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-calico-etcd
+  name: kubernetes-calico-etcd
+  namespace: kube-system
+spec:
+  chart_name: etcd
+  dependencies:
+  - kubernetes-calico-etcd-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-calico-etcd
+  source:
+    location: https://opendev.org/airship/promenade
+    reference: 44b5fae04788c6a28de0f9a2e132204561474d47
+    subpath: charts/etcd
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-calico-etcd
+        type: job
+  values:
+    anchor:
+      etcdctl_endpoint: 10.96.232.136
+    bootstrapping:
+      enabled: true
+      filename: calico-etcd-bootstrap
+      host_directory: /var/lib/anchor
+    etcd:
+      host_data_path: /var/lib/etcd/calico
+      host_etc_path: /etc/etcd/calico
+    images:
+      tags: {}
+    labels:
+      anchor:
+        node_selector_key: calico-etcd
+        node_selector_value: enabled
+    network:
+      service_client:
+        name: service-client
+        port: 6666
+        target_port: 6666
+      service_peer:
+        name: service-peer
+        port: 6667
+        target_port: 6667
+    nodes:
+    - name: aiab
+      tls:
+        client:
+          cert: $(DeckhandCertificate.calico-etcd.spec)
+          key: $(DeckhandCertificateKey.calico-etcd.spec)
+        peer:
+          cert: $(DeckhandCertificate.calico-etcd-peer.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-peer.spec)
+    secrets:
+      anchor:
+        tls:
+          cert: $(DeckhandCertificate.calico-etcd-anchor.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-anchor.spec)
+      tls:
+        client:
+          ca: $(DeckhandCertificateAuthority.calico-etcd.spec)
+        peer:
+          ca: $(DeckhandCertificateAuthority.calico-etcd-peer.spec)
+    service:
+      ip: 10.96.232.136
+      name: calico-etcd
+  wait:
+    labels:
+      release_group: airship-kubernetes-calico-etcd
+    timeout: 600

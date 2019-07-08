@@ -1,0 +1,482 @@
+apiVersion: pegleg.airshipit.org/v1alpha1
+kind: PeglegEndpointCatalogue
+metadata:
+  name: osh-endpoints
+  namespace: pegleg
+spec:
+  osh:
+    ceph_object_store:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: ceph-rgw
+        public: radosgw
+      name: radosgw
+      namespace: openstack
+      path:
+        default: /auth/v1.0
+      port:
+        api:
+          default: 8088
+          public: 80
+      scheme:
+        default: http
+        public: http
+    cinder_oslo_messaging:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: cinder-rabbitmq
+      namespace: openstack
+      path: /cinder
+      port:
+        amqp:
+          default: 5672
+        http:
+          default: 15672
+      scheme: rabbit
+    cinder_rabbitmq_exporter:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: cinder-rabbitmq-exporter
+      namespace: openstack
+      path:
+        default: /metrics
+      port:
+        metrics:
+          default: 9095
+      scheme:
+        default: http
+    cloudformation:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: heat-cfn
+        public: cloudformation
+      name: heat-cfn
+      path:
+        default: ""
+      port:
+        api:
+          default: 8000
+          public: 80
+      scheme:
+        default: http
+        public: http
+    cloudwatch:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: heat-cloudwatch
+        public: cloudwatch
+      name: heat-cloudwatch
+      path:
+        default: ""
+      port:
+        api:
+          default: 8003
+          public: 80
+      scheme:
+        default: http
+    compute:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: nova-api
+        public: nova
+      name: nova
+      path:
+        default: /v2/%(tenant_id)s
+      port:
+        api:
+          default: 8774
+          public: 80
+        novncproxy:
+          default: 80
+      scheme:
+        default: http
+        public: http
+    compute_metadata:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: nova-metadata
+        public: metadata
+      name: nova
+      path:
+        default: /
+      port:
+        metadata:
+          default: 8775
+          public: 80
+      scheme:
+        default: http
+    compute_novnc_proxy:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: nova-novncproxy
+        public: novncproxy
+      name: nova
+      path:
+        default: /vnc_auto.html
+      port:
+        novnc_proxy:
+          default: 6080
+          public: 80
+      scheme:
+        default: http
+        public: http
+    compute_spice_proxy:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: nova-spiceproxy
+      name: nova
+      path:
+        default: /spice_auto.html
+      port:
+        spice_proxy:
+          default: 6082
+      scheme:
+        default: http
+    dashboard:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: horizon-int
+        public: horizon
+      name: horizon
+      path:
+        default: ""
+      port:
+        web:
+          default: 80
+          public: 80
+      scheme:
+        default: http
+        public: http
+    glance_oslo_messaging:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: glance-rabbitmq
+      namespace: openstack
+      path: /glance
+      port:
+        amqp:
+          default: 5672
+        http:
+          default: 15672
+      scheme: rabbit
+    glance_rabbitmq_exporter:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: glance-rabbitmq-exporter
+      namespace: openstack
+      path:
+        default: /metrics
+      port:
+        metrics:
+          default: 9095
+      scheme:
+        default: http
+    heat_oslo_messaging:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: heat-rabbitmq
+      namespace: openstack
+      path: /heat
+      port:
+        amqp:
+          default: 5672
+        http:
+          default: 15672
+      scheme: rabbit
+    heat_rabbitmq_exporter:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: heat-rabbitmq-exporter
+      namespace: openstack
+      path:
+        default: /metrics
+      port:
+        metrics:
+          default: 9095
+      scheme:
+        default: http
+    identity:
+      host_fqdn_override:
+        default: ""
+      name: keystone
+      namespace: openstack
+      path:
+        default: /v3
+      port:
+        api:
+          default: 80
+          internal: 5000
+      scheme:
+        default: http
+        internal: http
+    image:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: glance-api
+        public: glance
+      name: glance
+      path:
+        default: ""
+      port:
+        api:
+          default: 9292
+          public: 80
+      scheme:
+        default: http
+        public: http
+    image_registry:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: glance-registry
+        public: glance-reg
+      name: glance-registry
+      path:
+        default: ""
+      port:
+        api:
+          default: 9191
+          public: 80
+      scheme:
+        default: http
+    keystone_oslo_messaging:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: keystone-rabbitmq
+      namespace: openstack
+      path: /keystone
+      port:
+        amqp:
+          default: 5672
+        http:
+          default: 15672
+      scheme: rabbit
+    keystone_rabbitmq_exporter:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: keystone-rabbitmq-exporter
+      namespace: openstack
+      path:
+        default: /metrics
+      port:
+        metrics:
+          default: 9095
+      scheme:
+        default: http
+    network:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: neutron-server
+        public: neutron
+      name: neutron
+      path:
+        default: ""
+      port:
+        api:
+          default: 9696
+          public: 80
+      scheme:
+        default: http
+        public: http
+    neutron_oslo_messaging:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: neutron-rabbitmq
+      namespace: openstack
+      path: /neutron
+      port:
+        amqp:
+          default: 5672
+        http:
+          default: 15672
+      scheme: rabbit
+    neutron_rabbitmq_exporter:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: neutron-rabbitmq-exporter
+      namespace: openstack
+      path:
+        default: /metrics
+      port:
+        metrics:
+          default: 9095
+      scheme:
+        default: http
+    nova_oslo_messaging:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: nova-rabbitmq
+      namespace: openstack
+      path: /nova
+      port:
+        amqp:
+          default: 5672
+        http:
+          default: 15672
+      scheme: rabbit
+    nova_rabbitmq_exporter:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: nova-rabbitmq-exporter
+      namespace: openstack
+      path:
+        default: /metrics
+      port:
+        metrics:
+          default: 9095
+      scheme:
+        default: http
+    object_store:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: ceph-rgw
+        public: radosgw
+      name: swift
+      namespace: openstack
+      path:
+        default: /swift/v1/KEY_$(tenant_id)s
+      port:
+        api:
+          default: 8088
+          public: 80
+      scheme:
+        default: http
+        public: http
+    orchestration:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: heat-api
+        public: heat
+      name: heat
+      path:
+        default: /v1/%(project_id)s
+      port:
+        api:
+          default: 8004
+          public: 80
+      scheme:
+        default: http
+        public: http
+    oslo_cache:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: memcached
+      namespace: openstack
+      port:
+        memcache:
+          default: 11211
+    oslo_db:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: mariadb
+        discovery: mariadb-discovery
+      path: /DB_NAME
+      port:
+        mysql:
+          default: 3306
+        wsrep:
+          default: 4567
+      scheme: mysql+pymysql
+    placement:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: placement-api
+        public: placement
+      name: placement
+      path:
+        default: /
+      port:
+        api:
+          default: 8778
+          public: 80
+      scheme:
+        default: http
+        public: http
+    prometheus_mysql_exporter:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: mysql-exporter
+      namespace: openstack
+      path:
+        default: /metrics
+      port:
+        metrics:
+          default: 9104
+      scheme:
+        default: http
+    volume:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: cinder-api
+        public: cinder
+      name: cinder
+      path:
+        default: /v1/%(tenant_id)s
+      port:
+        api:
+          default: 8776
+          public: 80
+      scheme:
+        default: http
+        public: http
+    volumev2:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: cinder-api
+        public: cinder
+      name: cinderv2
+      path:
+        default: /v2/%(tenant_id)s
+      port:
+        api:
+          default: 8776
+          public: 80
+      scheme:
+        default: http
+        public: http
+    volumev3:
+      host_fqdn_override:
+        default: ""
+      hosts:
+        default: cinder-api
+        public: cinder
+      name: cinderv3
+      path:
+        default: /v3/%(tenant_id)s
+      port:
+        api:
+          default: 8776
+          public: 80
+      scheme:
+        default: http
+        public: http

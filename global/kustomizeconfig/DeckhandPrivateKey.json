@@ -1,0 +1,44 @@
+{
+  "github.com//keleustes/airship-treasuremap/pkg/apis/deckhand/v1alpha1.DeckhandPrivateKey": {
+    "Schema": {
+      "description": "DeckhandPrivateKey",
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object.  Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values.  More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents.  Servers may infer this from the endpoint the client submits requests to. Cannot be updated.  In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "github.com//keleustes/airship-treasuremap/pkg/apis/deckhand/v1alpha1.DeckhandPrivateKeySpec"
+        },
+        "status": {
+          "$ref": "github.com//keleustes/airship-treasuremap/pkg/apis/deckhand/v1alpha1.DeckhandPrivateKeyStatus"
+        }
+      }
+    },
+    "Dependencies": [
+      "github.com//keleustes/airship-treasuremap/pkg/apis/deckhand/v1alpha1.DeckhandPrivateKeySpec",
+      "github.com//keleustes/airship-treasuremap/pkg/apis/deckhand/v1alpha1.DeckhandPrivateKeyStatus",
+      "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"
+    ]
+  },
+  "github.com//keleustes/airship-treasuremap/pkg/apis/deckhand/v1alpha1.DeckhandPrivateKeySpec": {
+    "Schema": {
+      "description": "DeckhandPrivateKeySpec defines the desired state of DeckhandPrivateKey",
+      "type": "string"
+    },
+    "Dependencies": []
+  },
+  "github.com//keleustes/airship-treasuremap/pkg/apis/deckhand/v1alpha1.DeckhandPrivateKeyStatus": {
+    "Schema": {
+      "description": "DeckhandPrivateKeyStatus defines the observed state of DeckhandPrivateKey"
+    },
+    "Dependencies": []
+  }
+}

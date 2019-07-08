@@ -1,0 +1,25 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: prometheus
+  name: prometheus
+  namespace: osh-infra
+spec:
+  values:
+    pod:
+      replicas:
+        prometheus: 1
+      resources:
+        #TODO(jeb) enabled: true
+        prometheus:
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+    storage:
+      requests:
+        storage: 50Gi

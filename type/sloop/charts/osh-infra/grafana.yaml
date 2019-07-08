@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: grafana
+  name: grafana
+  namespace: osh-infra
+spec:
+  values:
+    pod:
+      replicas:
+        grafana: 1

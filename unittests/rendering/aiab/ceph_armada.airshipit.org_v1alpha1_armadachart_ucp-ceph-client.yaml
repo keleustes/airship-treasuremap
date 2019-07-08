@@ -1,0 +1,165 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-client
+  name: ucp-ceph-client
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-client
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: ucp-ceph-client
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-client
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-ceph-client
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: d52a9d00-64b9-45f0-b564-08dffe95f847
+          osd_pool_default_size: 1
+      pool:
+        crush:
+          tunables: hammer
+        default:
+          crush_rule: same_host
+        spec:
+        - application: rbd
+          name: rbd
+          percent_total_data: 40
+          replication: 1
+        - application: cephfs
+          name: cephfs_metadata
+          percent_total_data: 5
+          replication: 1
+        - application: cephfs
+          name: cephfs_data
+          percent_total_data: 10
+          replication: 1
+        - application: rgw
+          name: .rgw.root
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.control
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.data.root
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.gc
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.log
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.intent-log
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.meta
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.usage
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.users.keys
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.users.email
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.users.swift
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.users.uid
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.buckets.extra
+          percent_total_data: 0.1
+          replication: 1
+        - application: rgw
+          name: default.rgw.buckets.index
+          percent_total_data: 3
+          replication: 1
+        - application: rgw
+          name: default.rgw.buckets.data
+          percent_total_data: 34.8
+          replication: 1
+        target:
+          osd: 1
+          pg_per_osd: 100
+          protected: true
+    deployment:
+      ceph: true
+    endpoints:
+      ceph_mgr:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mgr
+        namespace: ceph
+        port:
+          mgr:
+            default: 7000
+        scheme:
+          default: http
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: ceph
+        port:
+          mon:
+            default: 6789
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      mds:
+        node_selector_key: ceph-mds
+        node_selector_value: enabled
+      mgr:
+        node_selector_key: ceph-mgr
+        node_selector_value: enabled
+    network:
+      cluster: 10.0.2.0/24
+      public: 10.0.2.0/24
+    pod:
+      replicas:
+        mds: 1
+        mgr: 1
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-client
+    timeout: 900

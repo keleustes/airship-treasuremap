@@ -1,0 +1,15 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: oob
+  namespace: drydock
+spec:
+  cidr: 10.22.104.0/24
+  ranges:
+  - end: 10.22.104.22
+    start: 10.22.104.21
+    type: static
+  routes:
+  - gateway: 10.22.104.1
+    metric: 100
+    subnet: 0.0.0.0/0

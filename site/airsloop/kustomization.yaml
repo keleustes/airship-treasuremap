@@ -1,0 +1,30 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+patchesStrategicMerge:
+- ./profiles/genesis.yaml
+- ./software/charts/kubernetes/container-networking/etcd.yaml
+- ./software/charts/kubernetes/etcd/etcd.yaml
+- ./software/charts/osh/ceph/ceph-client.yaml
+- ./software/charts/ucp/divingbell.yaml
+
+resources:
+- ../../type/sloop
+
+- ./site-definition.yaml
+- ./profiles/hardware/dell_r720xd.yaml
+- ./profiles/host/compute.yaml
+- ./profiles/region.yaml
+- ./pki/pki-catalog.yaml
+- ./baremetal/bootactions/promjoin.yaml
+- ./baremetal/nodes.yaml
+- ./deployment/deployment-configuration.yaml
+- ./networks/common-addresses.yaml
+- ./networks/physical/networks.yaml
+- ./secrets/certificates/certificates.yaml
+- ./secrets/passphrases
+- ./secrets/publickey/airsloop_ssh_public_key.yaml
+- ./software/config/common-software-config.yaml
+
+vars:

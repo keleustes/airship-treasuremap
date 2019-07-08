@@ -1,0 +1,8 @@
+---
+apiVersion: pegleg.airshipit.org/v1alpha1
+kind: PeglegSiteDefinition
+metadata:
+  name: airskiff
+  namespace: pegleg
+spec:
+  site_type: single-node

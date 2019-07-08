@@ -1,0 +1,146 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: tenant-ceph-client
+  name: tenant-ceph-client
+  namespace: tenant-ceph
+spec:
+  chart_name: tenant-ceph-client
+  dependencies:
+  - tenant-ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: tenant-ceph-client
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.tenant-ceph-client)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-tenant-ceph-client
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    ceph_mgr_modules_config:
+      prometheus:
+        server_port: 9284
+    conf:
+      ceph:
+        global:
+          fsid: $(DeckhandPassphrase.tenant-ceph-fsid.spec)
+          osd_pool_default_size: 1
+      features:
+        mds: false
+      pool:
+        crush:
+          tunables: hammer
+        default:
+          crush_rule: replicated_rule
+        spec:
+        - application: rbd
+          name: rbd
+          percent_total_data: 10
+          replication: 3
+        - application: cinder-volume
+          name: cinder.volumes
+          percent_total_data: 40
+          replication: 3
+        - application: rgw
+          name: .rgw.root
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.control
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.data.root
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.gc
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.log
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.intent-log
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.meta
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.usage
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.users.keys
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.users.email
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.users.swift
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.users.uid
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.buckets.extra
+          percent_total_data: 0.1
+          replication: 3
+        - application: rgw
+          name: default.rgw.buckets.index
+          percent_total_data: 3
+          replication: 3
+        - application: rgw
+          name: default.rgw.buckets.data
+          percent_total_data: 30
+          replication: 3
+        target:
+          osd: 1
+          pg_per_osd: 100
+          protected: true
+    deployment:
+      ceph: true
+    endpoints:
+      ceph_mgr: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.tenant_ceph_mgr)
+      ceph_mon: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.tenant_ceph_mon)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ceph.tenant-ceph-client)
+    labels:
+      job:
+        node_selector_key: tenant-ceph-control-plane
+        node_selector_value: enabled
+      mds:
+        node_selector_key: tenant-ceph-mds
+        node_selector_value: enabled
+      mgr:
+        node_selector_key: tenant-ceph-mgr
+        node_selector_value: enabled
+    manifests:
+      deployment_mds: false
+    monitoring:
+      prometheus:
+        ceph_mgr:
+          port: 9284
+    network:
+      cluster: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.cluster_cidr)
+      public: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.public_cidr)
+  wait:
+    labels:
+      release_group: airship-tenant-ceph-client
+    timeout: 900

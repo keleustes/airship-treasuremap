@@ -1,0 +1,15 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: openstack-compute-kit
+  namespace: shipyard
+spec:
+  chart_group:
+  - libvirt
+  - openvswitch
+  - neutron-rabbitmq
+  - nova-rabbitmq
+  - neutron
+  - nova
+  sequenced: false

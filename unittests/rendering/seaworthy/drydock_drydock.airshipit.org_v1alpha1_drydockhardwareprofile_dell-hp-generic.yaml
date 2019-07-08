@@ -1,0 +1,14 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockHardwareProfile
+metadata:
+  name: dell-hp-generic
+  namespace: drydock
+spec:
+  bios_version: 2.2.3
+  boot_mode: bios
+  bootstrap_protocol: pxe
+  device_aliases: {}
+  generation: "8"
+  hw_version: "3"
+  pxe_interface: 0
+  vendor: Dell

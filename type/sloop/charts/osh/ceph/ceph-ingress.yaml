@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: tenant-ceph-ingress
+  name: tenant-ceph-ingress
+  namespace: tenant-ceph
+spec:
+  values:
+    pod:
+      replicas:
+        error_page: 1
+        ingress: 1

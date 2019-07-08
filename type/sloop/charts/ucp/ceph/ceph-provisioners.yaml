@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-provisioners
+  name: ucp-ceph-provisioners
+  namespace: ceph
+spec:
+  values:
+    pod:
+      replicas:
+        cephfs_provisioner: 1
+        rbd_provisioner: 1

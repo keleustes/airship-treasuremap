@@ -1,0 +1,65 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-proxy
+  name: kubernetes-proxy
+  namespace: kube-system
+spec:
+  chart_name: proxy
+  dependencies:
+  - kubernetes-proxy-htk
+  release: kubernetes-proxy
+  source:
+    location: https://opendev.org/airship/promenade
+    reference: 44b5fae04788c6a28de0f9a2e132204561474d47
+    subpath: charts/proxy
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-proxy
+        type: job
+  values:
+    command_prefix:
+    - /proxy
+    - --cluster-cidr=10.97.0.0/16
+    - --proxy-mode=iptables
+    images:
+      tags:
+        proxy: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+    kube_service:
+      host: 127.0.0.1
+      port: 6553
+    livenessProbe:
+      whitelist:
+      - tiller-deploy
+    secrets:
+      tls:
+        ca: |
+          -----BEGIN CERTIFICATE-----
+          MIIDSDCCAjCgAwIBAgIUPpb5ExrCoa1ZJKC6WZS+LgwCJnMwDQYJKoZIhvcNAQEL
+          BQAwKjETMBEGA1UEChMKS3ViZXJuZXRlczETMBEGA1UEAxMKa3ViZXJuZXRlczAe
+          Fw0xOTA0MTIxNTE5MDBaFw0yNDA0MTAxNTE5MDBaMCoxEzARBgNVBAoTCkt1YmVy
+          bmV0ZXMxEzARBgNVBAMTCmt1YmVybmV0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IB
+          DwAwggEKAoIBAQC36DZiGO27VQ8M2YWRD5nUW7f4tBSv3xoBmIqvwJCLgfiZ4wn3
+          3ll12fpR1AMzg599ZiUMnA1JAriRy83aFr3neVLotwos6x+jAEEHXcIUKbdm7C7t
+          KcaP+LRsoqk5PmLoelfgDoR+cKu63ZHhXGOsP1+hoLmazJVy/yUZhWDJZlZfLmMA
+          WovQJa1vtTwmmbF/Xrsn5rvdziySs6PO+lpSyYYmHbJMrQ9M01oOCCm6adoN7jbV
+          HGlS6u2OkFPLMRjNpSFa0ZqnBw8Q+uYkVMq5pSnTe/7itE0Ir6Spv5YzDWku534q
+          YVfoZR4A352FGd5CzKFS6AcdPs7vt8WF4HlDAgMBAAGjZjBkMA4GA1UdDwEB/wQE
+          AwIBBjASBgNVHRMBAf8ECDAGAQH/AgECMB0GA1UdDgQWBBTmP0cncsa93OpenmJX
+          2nH5gC/lDzAfBgNVHSMEGDAWgBTmP0cncsa93OpenmJX2nH5gC/lDzANBgkqhkiG
+          9w0BAQsFAAOCAQEAl/6QL2grTmxksxsrPro0x9Kd5Cnm62Cj+BUV/W80fgvSlKXp
+          O9PWct02TG77T7hE/H96/edt3rUROu2auUI1JwzJUFQeIdwjo14Cpttdc+e8IkN5
+          v/vv245WPOP5I580nMbNwqMreG5mBr74vcuXeh7wgIAbomjl54p4JTofmAeddPW+
+          6uPtG9WOpTb/XFPvMzsqkWHUprOAJqEqmOYxB8X6FqQ5O/JvWAGzZU865HOAQ7kn
+          ZUQId03SwsrCKLzur8SQMN2XulRJzKGnGt4lGiWAHWa3KkJHpH3nMSplregAHtqp
+          S6qQc6MZtBH5I6goaU2whtcaLVCujSYRBe8MVg==
+          -----END CERTIFICATE-----
+  wait:
+    labels:
+      release_group: airship-kubernetes-proxy
+    timeout: 600

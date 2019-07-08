@@ -1,0 +1,6 @@
+apiVersion: deckhand.airshipit.org/v1alpha1
+kind: DeckhandPassphrase
+metadata:
+  name: maas-region-key
+  namespace: pegleg
+spec: e12330cfe038735aee32

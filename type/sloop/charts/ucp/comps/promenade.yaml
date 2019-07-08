@@ -1,0 +1,15 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-promenade
+  name: ucp-promenade
+  namespace: ucp
+spec:
+  values:
+    pod:
+      env:
+        promenade_api: []
+      replicas:
+        api: 1

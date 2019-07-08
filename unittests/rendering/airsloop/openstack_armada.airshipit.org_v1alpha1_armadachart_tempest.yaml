@@ -1,0 +1,73 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: tempest
+    name: tempest
+  name: tempest
+  namespace: openstack
+spec:
+  chart_name: tempest
+  dependencies:
+  - tempest-htk
+  install:
+    no_hooks: false
+  release: tempest
+  source:
+    location: https://opendev.org/openstack/openstack-helm
+    reference: 47cb52b67c016aa364db9599db39fef719e4ae07
+    subpath: tempest
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-tempest
+        type: job
+  values:
+    ceph_client:
+      configmap: tenant-ceph-etc
+      user_secret_name: pvc-tceph-client-key
+    endpoints:
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: airsloop
+            user_domain_name: default
+            username: admin
+          tempest:
+            password: password123
+            project_domain_name: default
+            project_name: service
+            role: admin
+            user_domain_name: default
+            username: tempest
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: openstack
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-tempest
+    timeout: 900

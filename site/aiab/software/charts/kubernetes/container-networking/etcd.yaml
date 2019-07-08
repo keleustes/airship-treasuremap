@@ -1,0 +1,17 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kubernetes-calico-etcd
+  namespace: kube-system
+spec:
+  values:
+    nodes:
+    - name: $(PeglegCommonAddresses.common-addresses.spec.genesis.hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.calico-etcd.spec)
+          key: $(DeckhandCertificateKey.calico-etcd.spec)
+        peer:
+          cert: $(DeckhandCertificate.calico-etcd-peer.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-peer.spec)

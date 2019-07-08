@@ -1,0 +1,84 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-prometheus-openstack-exporter
+  name: ucp-prometheus-openstack-exporter
+  namespace: ucp
+spec:
+  chart_name: ucp-prometheus-openstack-exporter
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: ucp-prometheus-openstack-exporter
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 5e1ecd9840397bf9e8829ce0d98fcb721db1b74e
+    subpath: prometheus-openstack-exporter
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-prometheus-openstack-exporter
+        type: job
+  values:
+    endpoints:
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+          user:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: RegionOne
+            role: admin
+            user_domain_name: default
+            username: prometheus-openstack-exporter
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: ucp
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      prometheus_openstack_exporter:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: openstack-metrics
+        namespace: ucp
+        path:
+          default: ""
+        port:
+          exporter:
+            default: 9103
+        scheme:
+          default: http
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      openstack_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-ucp-prometheus-openstack-exporter
+    timeout: 900

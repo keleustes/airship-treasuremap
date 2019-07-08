@@ -1,0 +1,40 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: prometheus-process-exporter
+  namespace: kube-system
+spec:
+  chart_name: prometheus-process-exporter
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: prometheus-process-exporter
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh_infra.prometheus_process_exporter)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-prometheus-process-exporter
+        type: job
+  values:
+    endpoints:
+      process_exporter_metrics: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.process_exporter_metrics)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh_infra.prometheus_process_exporter)
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      node_exporter:
+        node_selector_key: node-exporter
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-prometheus-process-exporter
+    timeout: 900

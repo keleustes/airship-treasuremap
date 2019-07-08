@@ -1,0 +1,48 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-prometheus-openstack-exporter
+  name: ucp-prometheus-openstack-exporter
+  namespace: ucp
+spec:
+  chart_name: ucp-prometheus-openstack-exporter
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: ucp-prometheus-openstack-exporter
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh_infra.prometheus_openstack_exporter)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-prometheus-openstack-exporter
+        type: job
+  values:
+    endpoints:
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.keystone.admin)
+            password: $(DeckhandPassphrase.ucp-keystone-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.prometheus_openstack_exporter.user)
+            password: $(DeckhandPassphrase.ucp-openstack-exporter-keystone-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.identity)
+      prometheus_openstack_exporter: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.prometheus_openstack_exporter)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh_infra.prometheus_openstack_exporter)
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      openstack_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-ucp-prometheus-openstack-exporter
+    timeout: 900

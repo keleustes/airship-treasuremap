@@ -1,0 +1,106 @@
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: shipyarddeploymentstrategys.shipyard.airshipit.org
+  labels:
+    application: shipyard
+spec:
+  additionalPrinterColumns:
+  group: shipyard.airshipit.org
+  version: v1alpha1
+  names:
+    kind: ShipyardDeploymentStrategy
+    plural: shipyarddeploymentstrategys
+    shortNames:
+    - sdepstrat
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          type: 'object'
+          required:
+            - groups
+          properties:
+            groups:
+              type: 'array'
+              minItems: 0
+              items:
+                type: 'object'
+                required:
+                  - name
+                  - critical
+                  - depends_on
+                  - selectors
+                properties:
+                  name:
+                    type: 'string'
+                    minLength: 1
+                  critical:
+                    type: 'boolean'
+                  depends_on:
+                    type: 'array'
+                    minItems: 0
+                    items:
+                      type: 'string'
+                  selectors:
+                    type: 'array'
+                    minItems: 0
+                    items:
+                      type: 'object'
+                      minProperties: 1
+                      properties:
+                        node_names:
+                          type: 'array'
+                          items:
+                            type: 'string'
+                        node_labels:
+                          type: 'array'
+                          items:
+                            type: 'string'
+                        node_tags:
+                          type: 'array'
+                          items:
+                            type: 'string'
+                        rack_names:
+                          type: 'array'
+                          items:
+                            type: 'string'
+                      # additionalProperties: false
+                  success_criteria:
+                    type: 'object'
+                    minProperties: 1
+                    properties:
+                      percent_successful_nodes:
+                        type: 'integer'
+                        minimum: 0
+                        maximum: 100
+                      minimum_successful_nodes:
+                        type: 'integer'
+                        minimum: 0
+                      maximum_failed_nodes:
+                        type: 'integer'
+                        minimum: 0
+                    # additionalProperties: false
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+...

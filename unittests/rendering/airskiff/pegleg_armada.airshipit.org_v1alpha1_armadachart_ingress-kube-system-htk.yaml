@@ -1,0 +1,15 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ingress-kube-system-htk
+  namespace: pegleg
+spec:
+  chart_name: ingress-kube-system-htk
+  dependencies: []
+  release: ingress-kube-system-htk
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 9efb353b83c59e891b1b85dc6567044de0f5ac17
+    subpath: helm-toolkit
+    type: git
+  values: {}

@@ -1,0 +1,16 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: libvirt
+  namespace: openstack
+spec:
+  values:
+    conf:
+      ceph:
+        enabled: false
+    labels:
+      #TODO(jeb)
+      agent_libvirt:
+        node_selector_key: openstack-compute-node
+        node_selector_value: enabled

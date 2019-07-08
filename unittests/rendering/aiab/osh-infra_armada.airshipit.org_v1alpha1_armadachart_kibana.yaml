@@ -1,0 +1,114 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kibana
+  namespace: osh-infra
+spec:
+  chart_name: kibana
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: kibana
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 5e1ecd9840397bf9e8829ce0d98fcb721db1b74e
+    subpath: kibana
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-kibana
+        type: job
+  values:
+    conf:
+      apache:
+        host: |
+          <VirtualHost *:80>
+            ProxyRequests off
+            ProxyPreserveHost On
+            <Location />
+                ProxyPass http://localhost:{{ tuple "kibana" "internal" "kibana" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}/
+                ProxyPassReverse http://localhost:{{ tuple "kibana" "internal" "kibana" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}/
+            </Location>
+            <Proxy *>
+                AuthName "Kibana"
+                AuthType Basic
+                AuthBasicProvider file ldap
+                AuthUserFile /usr/local/apache2/conf/.htpasswd
+                AuthLDAPBindDN {{ .Values.endpoints.ldap.auth.admin.bind }}
+                AuthLDAPBindPassword {{ .Values.endpoints.ldap.auth.admin.password }}
+                AuthLDAPURL {{ tuple "ldap" "public" "ldap" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+                Require valid-user
+            </Proxy>
+          </VirtualHost>
+    endpoints:
+      elasticsearch:
+        auth:
+          admin:
+            password: password123
+            username: elasticsearch
+        host_fqdn_override:
+          default: ""
+        hosts:
+          data: elasticsearch-data
+          default: elasticsearch-logging
+          discovery: elasticsearch-discovery
+          public: elasticsearch
+        name: elasticsearch
+        namespace: osh-infra
+        path:
+          default: ""
+        scheme:
+          default: http
+      kibana:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: kibana-dash
+          public: kibana
+        name: kibana
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          kibana:
+            default: 5601
+            public: 80
+        scheme:
+          default: http
+          public: http
+      ldap:
+        auth:
+          admin:
+            bind: test@ldap.example.com
+            password: password123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ldap
+        path:
+          default: /DC=test,DC=test,DC=com?sAMAccountName?sub?memberof=CN=test,OU=Application,OU=Groups,DC=test,DC=test,DC=com
+        port:
+          ldap:
+            default: 389
+        scheme:
+          default: ldap
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      kibana:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-kibana
+    timeout: 900

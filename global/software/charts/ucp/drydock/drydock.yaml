@@ -1,0 +1,86 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-drydock
+  name: ucp-drydock
+  namespace: ucp
+spec:
+  chart_name: drydock
+  dependencies:
+  - drydock-htk
+  install:
+    no_hooks: false
+  release: drydock
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.drydock)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-drydock
+        type: job
+  values:
+    conf:
+      drydock:
+        database:
+          pool_size: 200
+        plugins:
+          ingester: drydock_provisioner.ingester.plugins.deckhand.DeckhandIngester
+    endpoints:
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.keystone.admin)
+            password: $(DeckhandPassphrase.ucp-keystone-admin-password.spec)
+          drydock:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.drydock.keystone)
+            password: $(DeckhandPassphrase.ucp-drydock-keystone-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.identity)
+      maas_region: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.maas_region)
+      physicalprovisioner:
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.physicalprovisioner)
+        port:
+          api:
+            nodeport: $(PeglegCommonAddresses.common-addresses.spec.node_ports.drydock_api)
+      postgresql:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.postgres.admin)
+            password: $(DeckhandPassphrase.ucp-postgres-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.drydock.postgres)
+            password: $(DeckhandPassphrase.ucp-drydock-postgres-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.postgresql)
+        path: /$(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.drydock.postgres.database)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.drydock)
+    labels:
+      #TODO(jeb):
+      drydock:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    network:
+      api:
+        nodeport:
+          enabled: false
+      drydock:
+        node_port:
+          port: $(PeglegCommonAddresses.common-addresses.spec.node_ports.drydock_api)
+  wait:
+    labels:
+      release_group: airship-drydock
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: drydock-htk
+  namespace: pegleg
+spec:
+  chart_name: drydock-htk
+  dependencies: []
+  release: drydock-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.drydock-htk)
+  values: {}

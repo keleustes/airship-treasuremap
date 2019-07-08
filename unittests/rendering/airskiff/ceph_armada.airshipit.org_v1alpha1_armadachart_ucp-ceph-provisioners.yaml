@@ -1,0 +1,77 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-provisioners
+  name: ucp-ceph-provisioners
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-provisioners
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: ucp-ceph-provisioners
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-provisioners
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-ceph-provisioners
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: 7b7576f4-3358-4668-9112-100440079807
+          osd_mkfs_type: xfs
+    deployment:
+      ceph: true
+      cephfs_provisioner: true
+      client_secrets: false
+      rbd_provisioner: true
+    endpoints:
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: ceph
+        port:
+          mon:
+            default: 6789
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      provisioner:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    network:
+      cluster: 10.23.23.0/24
+      public: 10.23.23.0/24
+    pod:
+      replicas:
+        cephfs_provisioner: 2
+        rbd_provisioner: 2
+    storageclass:
+      rbd:
+        ceph_configmap_name: ceph-client-keys-etc
+        parameters:
+          userSecretName: pvc-ceph-client-key
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-provisioners
+    timeout: 900

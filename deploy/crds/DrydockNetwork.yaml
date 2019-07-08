@@ -1,0 +1,103 @@
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: drydocknetworks.drydock.airshipit.org
+  labels:
+    application: drydock
+spec:
+  additionalPrinterColumns:
+  group: drydock.airshipit.org
+  version: v1alpha1
+  names:
+    kind: DrydockNetwork
+    plural: drydocknetworks
+    shortNames:
+    - dntw
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          type: 'object'
+          properties:
+            cidr:
+              type: 'string'
+            ranges:
+              type: 'array'
+              items:
+                type: 'object'
+                properties:
+                  type:
+                    type: 'string'
+                  start:
+                    type: 'string'
+                    format: 'ipv4'
+                  end:
+                    type: 'string'
+                    format: 'ipv4'
+                # additionalProperties: false
+            dns:
+              type: 'object'
+              properties:
+                domain:
+                  type: 'string'
+                servers:
+                  type: 'string'
+              # additionalProperties: false
+            dhcp_relay:
+              type: 'object'
+              properties:
+                self_ip:
+                  type: 'string'
+                  format: 'ipv4'
+                upstream_target:
+                  type: 'string'
+                  format: 'ipv4'
+              # additionalProperties: false
+            mtu:
+              type: 'number'
+            vlan:
+              type: 'string'
+            routedomain:
+              type: 'string'
+            routes:
+              type: 'array'
+              items:
+                type: 'object'
+                properties:
+                  subnet:
+                    type: 'string'
+                  gateway:
+                    type: 'string'
+                    format: 'ipv4'
+                  metric:
+                    type: 'number'
+                  routedomain:
+                    type: 'string'
+                # additionalProperties: false
+            labels:
+              type: 'object'
+              additionalProperties: true
+          # additionalProperties: false
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+...

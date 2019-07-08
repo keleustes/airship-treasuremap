@@ -1,0 +1,63 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    ingress: kube-system
+    name: ingress-kube-system
+  name: ingress-kube-system
+  namespace: kube-system
+spec:
+  chart_name: ingress-kube-system
+  dependencies:
+  - ingress-kube-system-htk
+  install:
+    no_hooks: false
+  release: ingress-kube-system
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.ingress)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ingress-kube-system
+        type: job
+  values:
+    # TODO(jeb):
+    # deployment:
+    #  mode: cluster
+    #  type: Deployment
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.ingress)
+    labels:
+      error_server:
+        node_selector_key: kube-ingress
+        node_selector_value: enabled
+      server:
+        node_selector_key: kube-ingress
+        node_selector_value: enabled
+    network:
+      host_namespace: true
+      ingress:
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-read-timeout: '603'
+    pod:
+      replicas:
+        error_page: 1
+        ingress: 1
+  wait:
+    labels:
+      release_group: airship-ingress-kube-system
+    timeout: 300
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ingress-kube-system-htk
+  namespace: pegleg
+spec:
+  chart_name: ingress-kube-system-htk
+  dependencies: []
+  release: ingress-kube-system-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.ingress-htk)
+  values: {}

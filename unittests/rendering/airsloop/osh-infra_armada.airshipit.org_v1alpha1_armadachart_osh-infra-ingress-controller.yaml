@@ -1,0 +1,44 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: osh-infra-ingress-controller
+  name: osh-infra-ingress-controller
+  namespace: osh-infra
+spec:
+  chart_name: osh-infra-ingress-controller
+  dependencies:
+  - osh-helm-toolkit
+  install:
+    no_hooks: false
+  release: osh-infra-ingress-controller
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 596732f16bf7cfe681ce0bb2d62e529bea5eea82
+    subpath: ingress
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-osh-infra-ingress-controller
+        type: job
+  values:
+    images:
+      tags: {}
+    labels:
+      error_server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        error_page: 1
+        ingress: 1
+  wait:
+    labels:
+      release_group: airship-osh-infra-ingress-controller
+    timeout: 900

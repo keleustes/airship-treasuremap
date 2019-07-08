@@ -1,0 +1,178 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: keystone
+    name: keystone
+  name: keystone
+  namespace: openstack
+spec:
+  chart_name: keystone
+  dependencies:
+  - keystone-htk
+  install:
+    no_hooks: false
+  release: keystone
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.keystone)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-keystone
+        type: job
+  values:
+    bootstrap:
+      script: |
+        openstack role create --or-show _member_
+        openstack role add \
+              --user="${OS_USERNAME}" \
+              --user-domain="${OS_USER_DOMAIN_NAME}" \
+              --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
+              --project="${OS_PROJECT_NAME}" \
+              "_member_"
+
+        #NOTE(portdirect): required for all users who operate heat stacks
+        openstack role create --or-show heat_stack_owner
+        openstack role add \
+              --user="${OS_USERNAME}" \
+              --user-domain="${OS_USER_DOMAIN_NAME}" \
+              --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
+              --project="${OS_PROJECT_NAME}" \
+              "heat_stack_owner"
+    conf:
+      keystone:
+        identity:
+          default_domain_id: default
+          domain_config_dir: /etc/keystonedomains
+          domain_configurations_from_database: true
+          domain_specific_drivers_enabled: true
+          driver: sql
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.keystone', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - 'null'
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_keystone:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: keystone
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - keystone
+    endpoints:
+      fluentd: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.fluentd)
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.admin)
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+      oslo_cache:
+        auth:
+          memcache_secret_key: $(DeckhandPassphrase.osh-oslo-cache-secret-key.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_cache)
+      oslo_db:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-oslo-db-admin-password.spec)
+          keystone:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.oslo_db)
+            password: $(DeckhandPassphrase.osh-keystone-oslo-db-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.oslo_db.database)
+      oslo_messaging:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.oslo_messaging.admin)
+            password: $(DeckhandPassphrase.osh-keystone-oslo-messaging-admin-password.spec)
+          keystone:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.oslo_messaging.keystone)
+            password: $(DeckhandPassphrase.osh-keystone-oslo-messaging-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.keystone_oslo_messaging)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.keystone)
+    labels:
+      api:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api: 2
+  wait:
+    labels:
+      release_group: airship-keystone
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: keystone-htk
+  namespace: pegleg
+spec:
+  chart_name: keystone-htk
+  dependencies: []
+  release: keystone-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.keystone-htk)
+  values: {}

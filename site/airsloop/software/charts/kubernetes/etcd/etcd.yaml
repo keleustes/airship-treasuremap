@@ -1,0 +1,33 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kubernetes-etcd
+  namespace: kube-system
+spec:
+  values:
+    nodes:
+    - name: $(PeglegCommonAddresses.common-addresses.spec.genesis.hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.kubernetes-etcd-genesis.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-genesis.spec)
+        peer:
+          cert: $(DeckhandCertificate.kubernetes-etcd-genesis-peer.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-genesis-peer.spec)
+    - name: $(PeglegCommonAddresses.common-addresses.spec.masters[0].hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.kubernetes-etcd-airsloop-control-2.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-airsloop-control-2.spec)
+        peer:
+          cert: $(DeckhandCertificate.kubernetes-etcd-airsloop-control-2-peer.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-airsloop-control-2-peer.spec)
+    - name: $(PeglegCommonAddresses.common-addresses.spec.masters[1].hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.kubernetes-etcd-airsloop-control-3.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-airsloop-control-3.spec)
+        peer:
+          cert: $(DeckhandCertificate.kubernetes-etcd-airsloop-control-3-peer.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-airsloop-control-3-peer.spec)

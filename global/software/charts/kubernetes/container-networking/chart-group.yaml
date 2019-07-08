@@ -1,0 +1,12 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: kubernetes-container-networking
+  namespace: shipyard
+spec:
+  chart_group:
+  - kubernetes-calico-etcd
+  - kubernetes-calico
+  description: Container networking via Calico
+  sequenced: true

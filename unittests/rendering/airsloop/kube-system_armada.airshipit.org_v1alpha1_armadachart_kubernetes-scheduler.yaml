@@ -1,0 +1,109 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-scheduler
+  name: kubernetes-scheduler
+  namespace: kube-system
+spec:
+  chart_name: scheduler
+  dependencies:
+  - kubernetes-scheduler-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-scheduler
+  source:
+    location: https://opendev.org/airship/promenade
+    reference: 44b5fae04788c6a28de0f9a2e132204561474d47
+    subpath: charts/scheduler
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-scheduler
+        type: job
+  values:
+    images:
+      tags:
+        anchor: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+        scheduler: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+    network:
+      kubernetes_netloc: 127.0.0.1:6553
+    secrets:
+      tls:
+        ca: |
+          -----BEGIN CERTIFICATE-----
+          MIIDSDCCAjCgAwIBAgIUPpb5ExrCoa1ZJKC6WZS+LgwCJnMwDQYJKoZIhvcNAQEL
+          BQAwKjETMBEGA1UEChMKS3ViZXJuZXRlczETMBEGA1UEAxMKa3ViZXJuZXRlczAe
+          Fw0xOTA0MTIxNTE5MDBaFw0yNDA0MTAxNTE5MDBaMCoxEzARBgNVBAoTCkt1YmVy
+          bmV0ZXMxEzARBgNVBAMTCmt1YmVybmV0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IB
+          DwAwggEKAoIBAQC36DZiGO27VQ8M2YWRD5nUW7f4tBSv3xoBmIqvwJCLgfiZ4wn3
+          3ll12fpR1AMzg599ZiUMnA1JAriRy83aFr3neVLotwos6x+jAEEHXcIUKbdm7C7t
+          KcaP+LRsoqk5PmLoelfgDoR+cKu63ZHhXGOsP1+hoLmazJVy/yUZhWDJZlZfLmMA
+          WovQJa1vtTwmmbF/Xrsn5rvdziySs6PO+lpSyYYmHbJMrQ9M01oOCCm6adoN7jbV
+          HGlS6u2OkFPLMRjNpSFa0ZqnBw8Q+uYkVMq5pSnTe/7itE0Ir6Spv5YzDWku534q
+          YVfoZR4A352FGd5CzKFS6AcdPs7vt8WF4HlDAgMBAAGjZjBkMA4GA1UdDwEB/wQE
+          AwIBBjASBgNVHRMBAf8ECDAGAQH/AgECMB0GA1UdDgQWBBTmP0cncsa93OpenmJX
+          2nH5gC/lDzAfBgNVHSMEGDAWgBTmP0cncsa93OpenmJX2nH5gC/lDzANBgkqhkiG
+          9w0BAQsFAAOCAQEAl/6QL2grTmxksxsrPro0x9Kd5Cnm62Cj+BUV/W80fgvSlKXp
+          O9PWct02TG77T7hE/H96/edt3rUROu2auUI1JwzJUFQeIdwjo14Cpttdc+e8IkN5
+          v/vv245WPOP5I580nMbNwqMreG5mBr74vcuXeh7wgIAbomjl54p4JTofmAeddPW+
+          6uPtG9WOpTb/XFPvMzsqkWHUprOAJqEqmOYxB8X6FqQ5O/JvWAGzZU865HOAQ7kn
+          ZUQId03SwsrCKLzur8SQMN2XulRJzKGnGt4lGiWAHWa3KkJHpH3nMSplregAHtqp
+          S6qQc6MZtBH5I6goaU2whtcaLVCujSYRBe8MVg==
+          -----END CERTIFICATE-----
+        cert: |
+          -----BEGIN CERTIFICATE-----
+          MIIDVzCCAj+gAwIBAgIUKmH59/sx5vbphv+HsXBO1ehlhZwwDQYJKoZIhvcNAQEL
+          BQAwKjETMBEGA1UEChMKS3ViZXJuZXRlczETMBEGA1UEAxMKa3ViZXJuZXRlczAe
+          Fw0xOTA0MTIxNTE5MDBaFw0yMDA0MTExNTE5MDBaMCAxHjAcBgNVBAMTFXN5c3Rl
+          bTprdWJlLXNjaGVkdWxlcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+          ALNq6X53fb+gcGmYIES73AQXY7kzqtw593XL6aWC2St2fulE4hciViRiPHdsn5zJ
+          ADnlnlLJvbCRZY2VgOhqM1mEXJsfY8St5A2eNMhpb2GumPgWxay8tEaJMhGxHfAq
+          fJmxiojGh77iwAAN7qJjtJkp9bcLQLfZTOkrtmGPpEE3QC0FPKOGus7ex+mI/wpV
+          ozMOXFRMV1CzK2VwuBPsxx/7O1sJIytwZxGIvkbS/VKbubdu0cq6ZIbMvcoqLl+R
+          /MvGKgccnnh0AMv3fLvHuJZu+lXd3LJvkg+a/Ds4a8qjTFkSUhk3Znd4wv04CwRw
+          MfQPYDXZJ8XOCNgHlY32xy0CAwEAAaN/MH0wDgYDVR0PAQH/BAQDAgWgMB0GA1Ud
+          JQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB0GA1UdDgQW
+          BBS+Kk5+U00Dxct9nKyuaOtEt4ZiCzAfBgNVHSMEGDAWgBTmP0cncsa93OpenmJX
+          2nH5gC/lDzANBgkqhkiG9w0BAQsFAAOCAQEAQ46Y6cK9QbcqdLp29uJD62KoTGaC
+          FipGXPzsdiB/77L/KOR8iyUoISmRSSH9bMy5oe8WQi8Be7u3sWTEQX9/xSs7mbfr
+          aLkmxJ5XWe14IQi7NFBxVVcUQTw4IaMrzY7KzyEnIhvC+3ugxb5U2SDE/dnkLyT8
+          HHwYrTef/uT783WZFTFi0yy2zzTxYae0wryTFgU3R9tLtF/cJ8T6fOERgd2IrAAi
+          WuH2zlW6MIniMNalnIBjUj+UL7K0uFIHXiJZ+Pp/SlWHyIX/Lu8l5PE+urCR7ftv
+          OEBW2RGi/0+cfL3SMQ8EfiWQNHZKGDBYI4j/jyz+WZGr+B3gwBmWJps5Zw==
+          -----END CERTIFICATE-----
+        key: |
+          -----BEGIN RSA PRIVATE KEY-----
+          MIIEowIBAAKCAQEAs2rpfnd9v6BwaZggRLvcBBdjuTOq3Dn3dcvppYLZK3Z+6UTi
+          FyJWJGI8d2yfnMkAOeWeUsm9sJFljZWA6GozWYRcmx9jxK3kDZ40yGlvYa6Y+BbF
+          rLy0RokyEbEd8Cp8mbGKiMaHvuLAAA3uomO0mSn1twtAt9lM6Su2YY+kQTdALQU8
+          o4a6zt7H6Yj/ClWjMw5cVExXULMrZXC4E+zHH/s7WwkjK3BnEYi+RtL9Upu5t27R
+          yrpkhsy9yiouX5H8y8YqBxyeeHQAy/d8u8e4lm76Vd3csm+SD5r8OzhryqNMWRJS
+          GTdmd3jC/TgLBHAx9A9gNdknxc4I2AeVjfbHLQIDAQABAoIBAH9qd7PWjDkgaXS0
+          EoZ9mzxUl/+Yj8iiafj//UgLassQ9gQXZTDks6RXF3YAcEHaBQ0Y4p0MpGfWefZY
+          rBliAmGaPGH1ota0X3bEWdvR9MW8Ruo40d1gje5h1Gr4C7jZk29axHVp+FE5mvzu
+          5//vKvxy7gs2NJnb+mDFKFqUtiORNgpH+++ROC0+eGzNiFovNM2UaraCrXSUEg+3
+          MCmDh0Po49Q7jh8gN4dbwfu+RoCsxys6e4piyI5Hs4j1x+Zw+mqUdMxk4EEg53vG
+          Nq1GnszPcpyqsiltscvOcUoAJRrXGuoOWeEQU3mklFfyLJORg78qRIlOiIn2IHeW
+          L0Eu/ckCgYEAxxyl309KITUYzXtAQNr0HMGflmxXIai3r37MUIr4z9ggJYiTtAhf
+          6Y1Pg7ouSpmhE7NaZR6I4o2f5dyVWq2akkQH2wsgys99uVXvhMpbmu2+gj3/YtRs
+          FDfYeIOwCKxM5+dF0RYziW3DLSqPeVjVXQstWeZDU1lJ1Exp7YJeO8sCgYEA5q3L
+          SAiwEOQXYAb/aoaCha4B6xsSLMhZcD3DBTeBMKzPN4AcKRoeb4w8bv424ClmgFle
+          +9q/P4AkjMRPX8GgdgGr8MpnoZhjb9dhB1YEhU/P97aMcwvJ8IdxCVSVYlIu48iZ
+          bXHNnY1pKaNRsVUEUoCVhtBSaumPHZ8KKfJIGecCgYBRrlHpgvhxGPwcx3P7Zxb/
+          ePrD1ZwE5da8urKMVAZwFURSwW1+THU0NVEqQ8VbuxxWHZx2oQkcj2bKACyQ72ja
+          mefzFuST7nyv/C3u9qiPrPobKd3LqELSJHq8LaGYXT6LX9fHR2lK9mk77RrAeA3H
+          Rp+LIqf52EYuPk6yLWoE8wKBgGTy2WsEokhCCRi090Ge66+knqJMjn+ajclYveei
+          ip7KgURAhBJYo8kdDbVk+o7Oj1TLx41gBSG86kHQBwxYp+f8g0o0yXUmQx3Gm2ei
+          dQgCDXjSIlSWbCEepJD4uwb0ACEewEXs75ZrNAJMvotkMSgJrWX59Jdk7oR//Oqu
+          ZG8xAoGBAKOPxRwC7wIr3jXFM6NUO0aN3tTaEfdoBdR1TS/Rl2mtHfoOpmlbWJq5
+          6c4rGczvbuZsg+6NUJo3x5F/08nqnYTGyhdlEXrSgrcFEYz2it0JwS3RTFTL6z7I
+          tibIXZqyR/1dqzdESkh+ZQCHn9rf3o+opKnqdMAOD88n08RUO7dn
+          -----END RSA PRIVATE KEY-----
+  wait:
+    labels:
+      release_group: airship-kubernetes-scheduler
+    timeout: 600

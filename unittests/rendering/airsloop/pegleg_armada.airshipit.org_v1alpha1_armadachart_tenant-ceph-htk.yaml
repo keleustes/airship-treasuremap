@@ -1,0 +1,15 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: tenant-ceph-htk
+  namespace: pegleg
+spec:
+  chart_name: tenant-ceph-htk
+  dependencies: []
+  release: tenant-ceph-htk
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: helm-toolkit
+    type: git
+  values: {}

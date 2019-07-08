@@ -1,0 +1,16 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: storage
+  namespace: drydock
+spec:
+  cidr: 10.22.73.0/24
+  mtu: 1500
+  ranges:
+  - end: 10.22.73.10
+    start: 10.22.73.1
+    type: reserved
+  - end: 10.22.73.31
+    start: 10.22.73.21
+    type: static
+  vlan: "73"

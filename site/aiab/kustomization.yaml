@@ -1,0 +1,31 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+patchesStrategicMerge:
+- ./manifests/bootstrap.yaml
+- ./profiles/genesis.yaml
+- ./software/charts/kubernetes/container-networking/etcd.yaml
+- ./software/charts/kubernetes/etcd/etcd.yaml
+- ./software/charts/osh/openstack-compute-kit/libvirt.yaml
+- ./software/charts/osh/openstack-compute-kit/neutron.yaml
+- ./software/charts/osh/openstack-compute-kit/nova.yaml
+- ./software/charts/osh/openstack-glance/chart-group.yaml
+- ./software/charts/osh/openstack-glance/glance.yaml
+- ./software/charts/osh/openstack-heat/chart-group.yaml
+- ./software/charts/osh/openstack-heat/heat.yaml
+- ./software/charts/ucp/divingbell.yaml
+- ./software/full-site.yaml
+
+resources:
+- ../../type/sloop
+
+- ./site-definition.yaml
+- ./pki/pki-catalog.yaml
+- ./deployment/deployment-configuration.yaml
+- ./deployment/dev-configurables.yaml
+- ./networks/common-addresses.yaml
+- ./secrets/passphrases
+- ./software/config/common-software-config.yaml
+
+vars:

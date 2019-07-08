@@ -1,0 +1,17 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kubernetes-etcd
+  namespace: kube-system
+spec:
+  values:
+    nodes:
+    - name: $(PeglegCommonAddresses.common-addresses.spec.genesis.hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.kubernetes-etcd-genesis.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-genesis.spec)
+        peer:
+          cert: $(DeckhandCertificate.kubernetes-etcd-genesis-peer.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-genesis-peer.spec)

@@ -1,0 +1,9 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: ucp-prometheus-openstack-exporter
+  namespace: shipyard
+spec:
+  chart_group:
+  - ucp-prometheus-openstack-exporter
+  description: Prometheus OpenStack Exporter for UCP Components

@@ -1,0 +1,24 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockRegion
+metadata:
+  name: seaworthy
+  namespace: drydock
+spec:
+  authorized_keys:
+  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyb6CDrai3VcFW1ew5ikf7IDSpqfFyrJNLI1DPyd28vcy6D1oFXdELYK7DsXzVCgV7YNDiKpneXMBTJ/Mr/aZi9K3eVvtRp1HAK3y6ycx9KRfyfMVAU0aT3xMOpE5xS/xTH8HNRbOSszp0woVYKhncpkumHweji7wbLKm/WxsggIoGDjn29KIoRhpo96tWz/DBsoU1pIHTMoZNyHW2aYWEx6kOzTEmhxL0LkKv7+A/2HJuLnqcXoQH9jl3kRQDyikNlSw2T3gQV3I8m0od/lEf98MZb1Yv9GrlDCmnUPXAJ2HQaWaVaPPpGcBW7veOZlLfeulwD4zlo6P6JW1SZaat
+    airship@seaworthy
+  repositories:
+    main_archive:
+      components:
+      - main
+      - universe
+      - multiverse
+      distributions:
+      - xenial
+      repo_type: apt
+      subrepos:
+      - security
+      - updates
+      - backports
+      url: http://us.archive.ubuntu.com/ubuntu
+  tag_definitions: []

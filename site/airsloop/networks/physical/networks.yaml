@@ -1,0 +1,168 @@
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetworkLink
+metadata:
+  name: oob
+  namespace: drydock
+spec:
+  allowed_networks:
+  - oob
+  bonding:
+    mode: disabled
+  labels:
+    noconfig: enabled
+  linkspeed: auto
+  mtu: 1500
+  trunking:
+    default_network: oob
+    mode: disabled
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: oob
+  namespace: drydock
+spec:
+  cidr: 10.22.104.0/24
+  ranges:
+  - end: 10.22.104.22
+    start: 10.22.104.21
+    type: static
+  routes:
+  - gateway: 10.22.104.1
+    metric: 100
+    subnet: 0.0.0.0/0
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetworkLink
+metadata:
+  name: pxe
+  namespace: drydock
+spec:
+  allowed_networks:
+  - pxe
+  bonding:
+    mode: disabled
+  linkspeed: auto
+  mtu: 1500
+  trunking:
+    default_network: pxe
+    mode: disabled
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: pxe
+  namespace: drydock
+spec:
+  cidr: 10.22.70.0/24
+  dns:
+    domain: atlantafoundry.com
+    servers: 8.8.8.8,8.8.4.4,208.67.222.222
+  ranges:
+  - end: 10.22.70.10
+    start: 10.22.70.1
+    type: reserved
+  - end: 10.22.70.31
+    start: 10.22.70.21
+    type: static
+  - end: 10.22.70.80
+    start: 10.22.70.40
+    type: dhcp
+  routes:
+  - gateway: 10.22.70.1
+    metric: 100
+    subnet: 0.0.0.0/0
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetworkLink
+metadata:
+  name: data
+  namespace: drydock
+spec:
+  allowed_networks:
+  - oam
+  - storage
+  - overlay
+  - calico
+  bonding:
+    mode: disabled
+  linkspeed: auto
+  mtu: 1500
+  trunking:
+    mode: 802.1q
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: oam
+  namespace: drydock
+spec:
+  cidr: 10.22.71.0/24
+  dns:
+    domain: atlantafoundry.com
+    servers: 8.8.8.8,8.8.4.4
+  mtu: 1500
+  ranges:
+  - end: 10.22.71.10
+    start: 10.22.71.1
+    type: reserved
+  - end: 10.22.71.31
+    start: 10.22.71.21
+    type: static
+  routes:
+  - gateway: 10.22.71.1
+    metric: 100
+    subnet: 0.0.0.0/0
+  vlan: '71'
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: calico
+  namespace: drydock
+spec:
+  cidr: 10.22.72.0/24
+  mtu: 1500
+  ranges:
+  - end: 10.22.72.10
+    start: 10.22.72.1
+    type: reserved
+  - end: 10.22.72.31
+    start: 10.22.72.21
+    type: static
+  vlan: '72'
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: storage
+  namespace: drydock
+spec:
+  cidr: 10.22.73.0/24
+  mtu: 1500
+  ranges:
+  - end: 10.22.73.10
+    start: 10.22.73.1
+    type: reserved
+  - end: 10.22.73.31
+    start: 10.22.73.21
+    type: static
+  vlan: '73'
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: overlay
+  namespace: drydock
+spec:
+  cidr: 10.22.74.0/24
+  mtu: 1500
+  ranges:
+  - end: 10.22.74.10
+    start: 10.22.74.1
+    type: reserved
+  - end: 10.22.74.31
+    start: 10.22.74.21
+    type: static
+  vlan: '74'

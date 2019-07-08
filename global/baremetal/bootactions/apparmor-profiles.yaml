@@ -1,0 +1,21 @@
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockBootAction
+metadata:
+  name: apparmor-profiles
+  namespace: drydock
+spec:
+  assets:
+  - data: $(PeglegAppArmorProfile.airship-default.spec.content)
+    data_pipeline:
+    - utf8_decode
+    path: $(PeglegAppArmorProfile.airship-default.spec.savePath)
+    permissions: '600'
+    type: file
+  - data: $(PeglegAppArmorProfile.airship-apparmor-loader.spec.content)
+    data_pipeline:
+    - utf8_decode
+    path: $(PeglegAppArmorProfile.airship-apparmor-loader.spec.savePath)
+    permissions: '600'
+    type: file
+  signaling: false

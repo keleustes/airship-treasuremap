@@ -1,0 +1,178 @@
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: promenadekubernetesnetworks.promenade.airshipit.org
+  labels:
+    application: promenade
+spec:
+  additionalPrinterColumns:
+  group: promenade.airshipit.org
+  version: v1alpha1
+  names:
+    kind: PromenadeKubernetesNetwork
+    plural: promenadekubernetesnetworks
+    shortNames:
+    - pkubntw
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          # definitions:
+          #   cidr:
+          #     type: string
+          #     pattern: '^(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\/([0-9]|[1-2][0-9]|3[0-2])$'
+          #   domain_name:
+          #     type: string
+          #     format: hostname
+          #   domain_suffix:
+          #     type: string
+          #     pattern: '^\.[a-z0-9][a-z0-9-\.]*$'
+          #   hostname:
+          #     type: string
+          #     format: hostname
+          #   hostname_or_ip_address:
+          #     anyOf:
+          #       - $ref: '#/definitions/hostname'
+          #       - $ref: '#/definitions/ip_address'
+          #       - $ref: '#/definitions/domain_suffix'
+          #   ip_address:
+          #     type: string
+          #     format: ipv4
+          #   url:
+          #     type: string
+          #     format: uri
+        
+          type: object
+          properties:
+            dns:
+              type: object
+              properties:
+                bootstrap_validation_checks:
+                  type: array
+                  items:
+                    # $ref: '#/definitions/domain_name'
+                    type: string
+                    format: hostname
+                cluster_domain:
+                  # $ref: '#/definitions/domain_name'
+                  type: string
+                  format: hostname
+                service_ip:
+                  # $ref: '#/definitions/ip_address'
+                  type: string
+                  format: ipv4
+                upstream_servers:
+                  type: array
+                  items:
+                    # $ref: '#/definitions/ip_address'
+                    type: string
+                    format: ipv4
+              required:
+                - cluster_domain
+                - service_ip
+              # additionalProperties: false
+        
+            etcd:
+              type: object
+              properties:
+                container_port:
+                  type: integer
+                haproxy_port:
+                  type: integer
+                # NOTE(mark-burnett): No longer used.
+                service_ip:
+                  # $ref: '#/definitions/ip_address'
+                  type: string
+                  format: ipv4
+              required:
+                - container_port
+                - haproxy_port
+              # additionalProperties: false
+        
+            kubernetes:
+              type: object
+              properties:
+                pod_cidr:
+                  # $ref: '#/definitions/cidr'
+                  type: string
+                  pattern: '^(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\/([0-9]|[1-2][0-9]|3[0-2])$'
+                service_ip:
+                  # $ref: '#/definitions/ip_address'
+                  type: string
+                  format: ipv4
+                service_cidr:
+                  # $ref: '#/definitions/cidr'
+                  type: string
+                  pattern: '^(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\.(\d|[1-9]\d|1\d\d|2([0-4]\d|5[0-5]))\/([0-9]|[1-2][0-9]|3[0-2])$'
+                apiserver_port:
+                  type: integer
+                haproxy_port:
+                  type: integer
+              required:
+                - pod_cidr
+                - service_cidr
+                - service_ip
+                - apiserver_port
+                - haproxy_port
+              # additionalProperties: false
+            hosts_entries:
+              type: array
+              items:
+                type: object
+                properties:
+                  ip:
+                    # $ref: '#/definitions/ip_address'
+                    type: string
+                    format: ipv4
+                  names:
+                    type: array
+                    items:
+                      # $ref: '#/definitions/hostname'
+                      type: string
+                      format: hostname
+        
+            proxy:
+              type: object
+              properties:
+                additional_no_proxy:
+                  type: array
+                  items:
+                    # $ref: '#/definitions/hostname_or_ip_address'
+                    # JEB: AnyOf not supported anyway.
+                    type: string
+                    format: ipv4
+                url:
+                  # $ref: '#/definitions/url'
+                  type: string
+                  #TODO(jeb) format: uri
+              required:
+                - url
+              # additionalProperties: false
+        
+          required:
+            - dns
+            - kubernetes
+          # additionalProperties: false
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+...

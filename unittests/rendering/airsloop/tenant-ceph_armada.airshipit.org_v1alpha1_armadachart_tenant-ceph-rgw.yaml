@@ -1,0 +1,120 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: tenant-ceph-rgw
+  namespace: tenant-ceph
+spec:
+  chart_name: tenant-ceph-rgw
+  dependencies:
+  - tenant-ceph-htk
+  install:
+    no_hooks: false
+  release: tenant-ceph-rgw
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-rgw
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-tenant-ceph-rgw
+        type: job
+  values:
+    bootstrap:
+      enabled: false
+    ceph_client:
+      configmap: tenant-ceph-etc
+    conf:
+      config:
+        rgw_keystone_token_cache_size: "0"
+      rgw_ks:
+        enabled: true
+    deployment:
+      ceph: true
+      cephfs_provisioner: false
+      client_secrets: false
+      rbd_provisioner: false
+      rgw_keystone_user_and_endpoints: true
+    endpoints:
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: tenant-ceph
+        port:
+          mon:
+            default: 6790
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: airsloop
+            user_domain_name: default
+            username: admin
+          swift:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: airsloop
+            role: admin
+            user_domain_name: default
+            username: swift
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: openstack
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      object_store:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-rgw
+          public: radosgw
+        name: swift
+        namespace: openstack
+        path:
+          default: /swift/v1/KEY_$(tenant_id)s
+        port:
+          api:
+            default: 8088
+            public: 80
+        scheme:
+          default: http
+          public: http
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: tenant-ceph-control-plane
+        node_selector_value: enabled
+      rgw:
+        node_selector_key: tenant-ceph-rgw
+        node_selector_value: enabled
+    network:
+      cluster: 10.22.73.0/24
+      public: 10.22.73.0/24
+    pod:
+      replicas:
+        rgw: 2
+    secrets:
+      keyrings:
+        admin: pvc-tceph-client-key
+  wait:
+    labels:
+      release_group: airship-tenant-ceph-rgw
+    timeout: 900

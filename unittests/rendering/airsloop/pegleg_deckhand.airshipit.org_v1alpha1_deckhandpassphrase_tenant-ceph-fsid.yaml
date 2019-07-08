@@ -1,0 +1,6 @@
+apiVersion: deckhand.airshipit.org/v1alpha1
+kind: DeckhandPassphrase
+metadata:
+  name: tenant-ceph-fsid
+  namespace: pegleg
+spec: 9e45aa5f-9d75-4fa7-bde5-c99e4a7db7a1

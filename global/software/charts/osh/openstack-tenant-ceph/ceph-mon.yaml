@@ -1,0 +1,68 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: tenant-ceph-mon
+  name: tenant-ceph-mon
+  namespace: tenant-ceph
+spec:
+  chart_name: tenant-ceph-mon
+  dependencies:
+  - tenant-ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: tenant-ceph-mon
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.tenant-ceph-mon)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-tenant-ceph-mon
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: $(DeckhandPassphrase.tenant-ceph-fsid.spec)
+      storage:
+        mon:
+          directory: /var/lib/openstack-helm/tenant-ceph/mon
+          log_directory: /var/log/tenant-ceph
+    deployment:
+      ceph: true
+      storage_secrets: true
+    endpoints:
+      ceph_mgr:
+        namespace: tenant-ceph
+      ceph_mon: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.tenant_ceph_mon)
+      fluentd:
+        namespace: osh-infra
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ceph.tenant-ceph-mon)
+    labels:
+      job:
+        node_selector_key: tenant-ceph-control-plane
+        node_selector_value: enabled
+      mon:
+        node_selector_key: tenant-ceph-mon
+        node_selector_value: enabled
+    monitoring:
+      ceph_mgr:
+        port: 9284
+    network:
+      cluster: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.cluster_cidr)
+      public: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.public_cidr)
+    storageclass:
+      rbd:
+        parameters:
+          adminSecretNamespace: tenant-ceph
+  wait:
+    labels:
+      release_group: airship-tenant-ceph-mon
+    timeout: 1800

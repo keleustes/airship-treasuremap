@@ -1,0 +1,294 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: glance
+    name: glance
+  name: glance
+  namespace: openstack
+spec:
+  chart_name: glance
+  dependencies:
+  - glance-htk
+  install:
+    no_hooks: false
+  release: glance
+  source:
+    location: https://opendev.org/openstack/openstack-helm
+    reference: 47cb52b67c016aa364db9599db39fef719e4ae07
+    subpath: glance
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-glance
+        type: job
+  values:
+    ceph_client:
+      configmap: tenant-ceph-etc
+      user_secret_name: pvc-tceph-client-key
+    conf:
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.glance', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - "null"
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_glance:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: glance
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - glance
+    endpoints:
+      ceph_object_store:
+        auth:
+          glance:
+            password: password123
+            tmpurlkey: password123
+            username: glance
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-rgw
+          public: radosgw
+        name: radosgw
+        namespace: openstack
+        path:
+          default: /auth/v1.0
+        port:
+          api:
+            default: 8088
+            public: 80
+        scheme:
+          default: http
+          public: http
+      fluentd:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: fluentd-logging
+        name: fluentd
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          metrics:
+            default: 24220
+          service:
+            default: 24224
+        scheme:
+          default: http
+      identity:
+        auth:
+          admin:
+            password: password123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+          glance:
+            password: password123
+            project_domain_name: default
+            project_name: service
+            region_name: RegionOne
+            role: admin
+            user_domain_name: default
+            username: glance
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: openstack
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      image:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: glance-api
+          public: glance
+        name: glance
+        path:
+          default: ""
+        port:
+          api:
+            default: 9292
+            public: 80
+        scheme:
+          default: http
+          public: http
+      image_registry:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: glance-registry
+          public: glance-reg
+        name: glance-registry
+        path:
+          default: ""
+        port:
+          api:
+            default: 9191
+            public: 80
+        scheme:
+          default: http
+      object_store:
+        auth:
+          glance:
+            tmpurlkey: password123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-rgw
+          public: radosgw
+        name: swift
+        namespace: openstack
+        path:
+          default: /swift/v1/KEY_$(tenant_id)s
+        port:
+          api:
+            default: 8088
+            public: 80
+        scheme:
+          default: http
+          public: http
+      oslo_cache:
+        auth:
+          memcache_secret_key: password123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        namespace: openstack
+        port:
+          memcache:
+            default: 11211
+      oslo_db:
+        auth:
+          admin:
+            password: password123
+          glance:
+            database: glance
+            password: password123
+            username: glance
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /glance
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+      oslo_messaging:
+        auth:
+          admin:
+            password: password123
+            username: glance-rabbitmq-admin
+          glance:
+            password: password123
+            username: glance-rabbitmq-user
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: glance-rabbitmq
+        namespace: openstack
+        path: /glance
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: rabbit
+    images:
+      tags: {}
+    labels:
+      api:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      registry:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api: 1
+        registry: 1
+    storage:
+      todojeb: pvc
+  wait:
+    labels:
+      release_group: airship-glance
+    timeout: 900

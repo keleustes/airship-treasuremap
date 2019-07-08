@@ -1,0 +1,31 @@
+---
+apiVersion: promenade.airshipit.org/v1alpha1
+kind: PromenadeGenesis
+metadata:
+  name: genesis
+  namespace: drydock
+spec:
+  armada:
+    target_manifest: cluster-bootstrap
+  labels:
+    dynamic:
+    - beta.kubernetes.io/fluentd-ds-ready=true
+    - calico-etcd=enabled
+    - kube-dns=enabled
+    - kube-ingress=enabled
+    - kubernetes-apiserver=enabled
+    - kubernetes-controller-manager=enabled
+    - kubernetes-etcd=enabled
+    - kubernetes-scheduler=enabled
+    - promenade-genesis=enabled
+    - ucp-control-plane=enabled
+    - maas-rack=enabled
+    - maas-region=enabled
+    - openstack-control-plane=enabled
+    - openvswitch=enabled
+    - openstack-l3-agent=enabled
+    - node-exporter=enabled
+    - fluentd=enabled
+    - openstack-control-plane=enabled
+    - openstack-nova-compute=enabled
+    - openstack-libvirt=kernel

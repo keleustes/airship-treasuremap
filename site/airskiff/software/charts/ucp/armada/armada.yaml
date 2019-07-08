@@ -1,0 +1,20 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-armada
+  namespace: ucp
+spec:
+  source:
+    location: /airship-components/armada
+    subpath: charts/armada
+    type: local
+  values:
+    images:
+      tags:
+        api: quay.io/airshipit/armada:latest-ubuntu_xenial
+    pod:
+      replicas:
+        api: 1
+  wait:
+    timeout: 1800

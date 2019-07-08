@@ -1,0 +1,11 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: osh-infra-dashboards
+  namespace: shipyard
+spec:
+  chart_group:
+  - kibana
+  - grafana
+  description: OSH Infra Dashboards

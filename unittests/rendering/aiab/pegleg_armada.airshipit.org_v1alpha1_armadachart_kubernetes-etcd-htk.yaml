@@ -1,0 +1,15 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kubernetes-etcd-htk
+  namespace: pegleg
+spec:
+  chart_name: kubernetes-etcd-htk
+  dependencies: []
+  release: kubernetes-etcd-htk
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 9efb353b83c59e891b1b85dc6567044de0f5ac17
+    subpath: helm-toolkit
+    type: git
+  values: {}

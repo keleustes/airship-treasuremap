@@ -1,0 +1,58 @@
+apiVersion: promenade.airshipit.org/v1alpha1
+kind: PromenadeGenesis
+metadata:
+  labels:
+    name: genesis
+  name: genesis
+  namespace: drydock
+spec:
+  apiserver:
+    command_prefix:
+    - /apiserver
+    - --service-cluster-ip-range=10.96.0.0/16
+    - --service-node-port-range=30000-32767
+    - --authorization-mode=Node,RBAC
+    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds
+    - --endpoint-reconciler-type=lease
+    - --feature-gates=PodShareProcessNamespace=true
+  armada:
+    target_manifest: cluster-bootstrap
+  files:
+  - content: |-
+      # placeholder for triggering calico etcd bootstrapping
+      # this file will be deleted
+    mode: 420
+    path: /var/lib/anchor/calico-etcd-bootstrap
+  hostname: aiab
+  images:
+    armada: quay.io/airshipit/armada:2f28fb5bf04a613d9d31e53ff310c98555f6d179-ubuntu_xenial
+    helm:
+      tiller: gcr.io/kubernetes-helm/tiller:v2.13.1
+    kubernetes:
+      apiserver: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+      controller-manager: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+      etcd: quay.io/coreos/etcd:v3.2.18
+      scheduler: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+  ip: 10.0.2.14
+  labels:
+    dynamic:
+    - beta.kubernetes.io/fluentd-ds-ready=true
+    - calico-etcd=enabled
+    - kube-dns=enabled
+    - kube-ingress=enabled
+    - kubernetes-apiserver=enabled
+    - kubernetes-controller-manager=enabled
+    - kubernetes-etcd=enabled
+    - kubernetes-scheduler=enabled
+    - promenade-genesis=enabled
+    - ucp-control-plane=enabled
+    - maas-rack=enabled
+    - maas-region=enabled
+    - openstack-control-plane=enabled
+    - openvswitch=enabled
+    - openstack-l3-agent=enabled
+    - node-exporter=enabled
+    - fluentd=enabled
+    - openstack-control-plane=enabled
+    - openstack-nova-compute=enabled
+    - openstack-libvirt=kernel

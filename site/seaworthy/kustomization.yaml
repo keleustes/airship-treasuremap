@@ -1,0 +1,45 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+patchesStrategicMerge:
+- ./profiles/genesis.yaml
+- ./software/charts/kubernetes/container-networking/etcd.yaml
+- ./software/charts/kubernetes/etcd/etcd.yaml
+- ./software/charts/kubernetes/ingress/ingress.yaml
+- ./software/charts/osh-infra/osh-infra-logging/elasticsearch.yaml
+- ./software/charts/osh-infra/osh-infra-logging/fluentbit.yaml
+- ./software/charts/osh-infra/osh-infra-logging/fluentd.yaml
+- ./software/charts/osh/openstack-compute-kit/neutron.yaml
+- ./software/charts/osh/openstack-compute-kit/nova.yaml
+- ./software/charts/osh/openstack-tenant-ceph/ceph-client.yaml
+- ./software/charts/osh/openstack-tenant-ceph/ceph-osd.yaml
+- ./software/charts/ucp/ceph/ceph-client-update.yaml
+- ./software/charts/ucp/ceph/ceph-client.yaml
+- ./software/charts/ucp/ceph/ceph-osd.yaml
+- ./software/charts/ucp/divingbell/divingbell.yaml
+- ./software/charts/ucp/drydock/drydock.yaml
+- ./software/charts/ucp/promenade/promenade.yaml
+
+resources:
+- ../../type/foundry
+
+- ./site-definition.yaml
+- ./profiles/hardware/dell_r720.yaml
+- ./profiles/host/cp_r720.yaml
+- ./profiles/host/dp_r720.yaml
+- ./profiles/region.yaml
+- ./pki/pki-catalog.yaml
+- ./baremetal/bootactions/promjoin.yaml
+- ./baremetal/nodes.yaml
+- ./deployment/deployment-configuration.yaml
+- ./networks/common-addresses.yaml
+- ./networks/physical/networks.yaml
+- ./secrets/certificates/certificates.yaml
+- ./secrets/certificates/ingress.yaml
+- ./secrets/passphrases/
+- ./software/config/common-software-config.yaml
+- ./software/config/endpoints.yaml
+- ./software/config/service_accounts.yaml
+
+vars:

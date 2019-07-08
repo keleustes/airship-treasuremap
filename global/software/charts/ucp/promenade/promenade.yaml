@@ -1,0 +1,72 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-promenade
+  name: ucp-promenade
+  namespace: ucp
+spec:
+  chart_name: promenade
+  dependencies:
+  - promenade-htk
+  install:
+    no_hooks: false
+  release: ucp-promenade
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.promenade)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-promenade
+        type: job
+  values:
+    conf:
+      paste:
+        filter:authtoken:
+          admin_tenant_name: service
+          admin_user: promenade
+          delay_auth_decision: true
+          identity_uri: http://keystone-api.ucp.svc.cluster.local/
+          paste.filter_factory: keystonemiddleware.auth_token:filter_factory
+          service_token_roles_required: true
+    endpoints:
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.keystone.admin)
+            password: $(DeckhandPassphrase.ucp-keystone-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.promenade.keystone)
+            password: $(DeckhandPassphrase.ucp-promenade-keystone-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.identity)
+      kubernetesprovisioner: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.kubernetesprovisioner)
+    images:
+      tags:
+        monitoring_image: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.promenade.monitoring_image)
+        parent-inline: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.promenade)
+    pod:
+      env:
+        promenade_api:
+        - name: UWSGI_TIMEOUT
+          value: '900'
+      mount_path: $(PromenadeHostSystem.host-system.spec.files[0].path)
+      replicas:
+        api: 2
+  wait:
+    labels:
+      release_group: airship-ucp-promenade
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: promenade-htk
+  namespace: pegleg
+spec:
+  chart_name: promenade-htk
+  dependencies: []
+  release: promenade-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.promenade-htk)
+  values: {}

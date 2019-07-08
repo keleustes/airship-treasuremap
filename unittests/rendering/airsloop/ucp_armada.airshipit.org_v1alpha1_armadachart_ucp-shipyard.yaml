@@ -1,0 +1,183 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-shipyard
+  name: ucp-shipyard
+  namespace: ucp
+spec:
+  chart_name: shipyard
+  dependencies:
+  - shipyard-htk
+  install:
+    no_hooks: false
+  release: ucp-shipyard
+  source:
+    location: https://opendev.org/airship/shipyard
+    reference: 89a8eda43e4af3cf146f89a25e96c37dbaa5fa88
+    subpath: charts/shipyard
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-shipyard
+        type: job
+  values:
+    conf:
+      shipyard:
+        keystone_authtoken:
+          memcache_security_strategy: None
+    endpoints:
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+          shipyard:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: RegionOne
+            role: admin
+            user_domain_name: default
+            username: shipyard
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: ucp
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      oslo_cache:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        port:
+          memcache:
+            default: 11211
+      oslo_messaging:
+        auth:
+          admin:
+            password: airsloop123
+            username: rabbitmq
+          user:
+            password: airsloop123
+            username: airflow
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: rabbitmq
+        namespace: null
+        path: /airflow
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: amqp
+      postgresql_airflow_celery_db:
+        auth:
+          admin:
+            password: airsloop123
+            username: postgres
+          user:
+            database: airflow
+            password: airsloop123
+            username: airflow
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: postgresql
+        name: postgresql-airflow-celery-db
+        path: /airflow
+        port:
+          postgresql:
+            default: 5432
+        scheme: db+postgresql
+      postgresql_airflow_db:
+        auth:
+          admin:
+            password: airsloop123
+            username: postgres
+          user:
+            database: airflow
+            password: airsloop123
+            username: airflow
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: postgresql
+        name: postgresql
+        path: /airflow
+        port:
+          postgresql:
+            default: 5432
+        scheme: postgresql+psycopg2
+      postgresql_shipyard_db:
+        auth:
+          admin:
+            password: airsloop123
+            username: postgres
+          user:
+            database: shipyard
+            password: airsloop123
+            username: shipyard
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: postgresql
+        name: postgresql
+        path: /shipyard
+        port:
+          postgresql:
+            default: 5432
+        scheme: postgresql+psycopg2
+      shipyard:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: shipyard-int
+          public: shipyard-api
+        name: shipyard
+        path:
+          default: /api/v1.0
+        port:
+          api:
+            default: 9000
+            public: 80
+        scheme:
+          default: http
+          public: http
+    images:
+      tags:
+        airflow: quay.io/airshipit/airflow:89a8eda43e4af3cf146f89a25e96c37dbaa5fa88-ubuntu_xenial
+        airflow_db_sync: quay.io/airshipit/airflow:89a8eda43e4af3cf146f89a25e96c37dbaa5fa88-ubuntu_xenial
+        shipyard: quay.io/airshipit/shipyard:89a8eda43e4af3cf146f89a25e96c37dbaa5fa88-ubuntu_xenial
+        shipyard_db_sync: quay.io/airshipit/shipyard:89a8eda43e4af3cf146f89a25e96c37dbaa5fa88-ubuntu_xenial
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        airflow_scheduler: 1
+        airflow_worker: 1
+        shipyard_api: 1
+    prod_environment: true
+  wait:
+    labels:
+      release_group: airship-ucp-shipyard
+    timeout: 600

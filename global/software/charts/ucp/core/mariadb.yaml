@@ -1,0 +1,62 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-mariadb
+  name: ucp-mariadb
+  namespace: ucp
+spec:
+  chart_name: ucp-mariadb
+  dependencies:
+  - mariadb-htk
+  install:
+    no_hooks: false
+  release: ucp-mariadb
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.mariadb)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-mariadb
+        type: job
+  values:
+    endpoints:
+      oslo_db:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.oslo_db.admin)
+            password: $(DeckhandPassphrase.ucp-oslo-db-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.oslo_db)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.mariadb)
+    labels:
+      error_server:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      ingress:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      prometheus_mysql_exporter:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-ucp-mariadb
+    timeout: 300
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: mariadb-htk
+  namespace: pegleg
+spec:
+  chart_name: mariadb-htk
+  dependencies: []
+  release: mariadb-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.mariadb-htk)
+  values: {}

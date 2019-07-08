@@ -1,0 +1,51 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: podsecuritypolicy
+  name: podsecuritypolicy
+  namespace: ucp
+spec:
+  chart_name: podsecuritypolicy
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: true
+  release: podsecuritypolicy
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 5e1ecd9840397bf9e8829ce0d98fcb721db1b74e
+    subpath: podsecuritypolicy
+    type: git
+  upgrade:
+    no_hooks: true
+  values:
+    conf:
+      defaults:
+        authenticated: psp-default
+        serviceaccounts: psp-default
+        unauthenticated: nil
+    data:
+      psp-default:
+        allowPrivilegeEscalation: true
+        allowedCapabilities:
+        - '*'
+        fsGroup:
+          rule: RunAsAny
+        hostIPC: true
+        hostNetwork: true
+        hostPID: true
+        hostPorts:
+        - max: 65536
+          min: 1
+        privileged: true
+        runAsUser:
+          rule: RunAsAny
+        seLinux:
+          rule: RunAsAny
+        supplementalGroups:
+          rule: RunAsAny
+        volumes:
+        - '*'
+  wait:
+    resources: []

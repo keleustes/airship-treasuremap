@@ -1,0 +1,83 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: keystone
+    name: keystone-rabbitmq
+  name: keystone-rabbitmq
+  namespace: openstack
+spec:
+  chart_name: keystone-rabbitmq
+  dependencies:
+  - keystone-rabbitmq-htk
+  install:
+    no_hooks: false
+  release: keystone-rabbitmq
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 0714b9d7ae08a88565d2c81c1b185fd77efaafca
+    subpath: rabbitmq
+    type: git
+  test:
+    enabled: false
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-keystone-rabbitmq
+        type: job
+  values:
+    endpoints:
+      oslo_messaging:
+        auth:
+          erlang_cookie: password123
+          user:
+            password: password123
+            username: keystone-rabbitmq-admin
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: keystone-rabbitmq
+        namespace: openstack
+        path: /keystone
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: rabbit
+      prometheus_rabbitmq_exporter:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: keystone-rabbitmq-exporter
+        namespace: openstack
+        path:
+          default: /metrics
+        port:
+          metrics:
+            default: 9095
+        scheme:
+          default: http
+    images:
+      tags: {}
+    labels:
+      prometheus_rabbitmq_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: false
+    pod:
+      replicas:
+        server: 1
+  wait:
+    labels:
+      release_group: airship-keystone-rabbitmq
+    resources:
+    - type: statefulset
+    timeout: 900

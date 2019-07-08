@@ -1,0 +1,9 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: tenant-ceph-osd
+  name: tenant-ceph-osd
+  namespace: tenant-ceph
+spec: {}

@@ -1,0 +1,73 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kibana
+  namespace: osh-infra
+spec:
+  chart_name: kibana
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: kibana
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh_infra.kibana)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-kibana
+        type: job
+  values:
+    conf:
+      apache:
+        host: |
+          <VirtualHost *:80>
+            ProxyRequests off
+            ProxyPreserveHost On
+            <Location />
+                ProxyPass http://localhost:{{ tuple "kibana" "internal" "kibana" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}/
+                ProxyPassReverse http://localhost:{{ tuple "kibana" "internal" "kibana" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}/
+            </Location>
+            <Proxy *>
+                AuthName "Kibana"
+                AuthType Basic
+                AuthBasicProvider file ldap
+                AuthUserFile /usr/local/apache2/conf/.htpasswd
+                AuthLDAPBindDN {{ .Values.endpoints.ldap.auth.admin.bind }}
+                AuthLDAPBindPassword {{ .Values.endpoints.ldap.auth.admin.password }}
+                AuthLDAPURL {{ tuple "ldap" "public" "ldap" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+                Require valid-user
+            </Proxy>
+          </VirtualHost>
+    endpoints:
+      elasticsearch:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.elasticsearch.admin)
+            password: $(DeckhandPassphrase.osh-infra-elasticsearch-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.elasticsearch)
+      kibana: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.kibana)
+      ldap:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.ldap.admin)
+            password: $(DeckhandPassphrase.osh-keystone-ldap-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.ldap)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh_infra.kibana)
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      kibana:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-kibana
+    timeout: 900

@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-deckhand
+  name: ucp-deckhand
+  namespace: ucp
+spec:
+  values:
+    pod:
+      replicas:
+        deckhand: 1

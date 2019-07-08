@@ -1,0 +1,78 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: nova
+    name: nova-rabbitmq
+  name: nova-rabbitmq
+  namespace: openstack
+spec:
+  chart_name: nova-rabbitmq
+  dependencies:
+  - nova-rabbitmq-htk
+  install:
+    no_hooks: false
+  release: nova-rabbitmq
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 0714b9d7ae08a88565d2c81c1b185fd77efaafca
+    subpath: rabbitmq
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-nova-rabbitmq
+        type: job
+  values:
+    endpoints:
+      oslo_messaging:
+        auth:
+          erlang_cookie: password123
+          user:
+            password: password123
+            username: nova-rabbitmq-admin
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-rabbitmq
+        namespace: openstack
+        path: /nova
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: rabbit
+      prometheus_rabbitmq_exporter:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-rabbitmq-exporter
+        namespace: openstack
+        path:
+          default: /metrics
+        port:
+          metrics:
+            default: 9095
+        scheme:
+          default: http
+    images:
+      tags: {}
+    labels:
+      prometheus_rabbitmq_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: true
+  wait:
+    labels:
+      release_group: airship-nova-rabbitmq
+    resources:
+    - type: statefulset
+    timeout: 900

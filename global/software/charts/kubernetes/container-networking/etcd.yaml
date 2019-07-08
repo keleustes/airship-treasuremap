@@ -1,0 +1,77 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-calico-etcd
+  name: kubernetes-calico-etcd
+  namespace: kube-system
+spec:
+  chart_name: etcd
+  dependencies:
+  - kubernetes-calico-etcd-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-calico-etcd
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.calico.etcd)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-calico-etcd
+        type: job
+  values:
+    anchor:
+      etcdctl_endpoint: $(PeglegCommonAddresses.common-addresses.spec.calico.etcd.service_ip)
+    bootstrapping:
+      enabled: true
+      filename: calico-etcd-bootstrap
+      host_directory: /var/lib/anchor
+    etcd:
+      host_data_path: /var/lib/etcd/calico
+      host_etc_path: /etc/etcd/calico
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.calico.etcd)
+    labels:
+      anchor:
+        node_selector_key: calico-etcd
+        node_selector_value: enabled
+    network:
+      service_client:
+        name: service-client
+        port: 6666
+        target_port: 6666
+      service_peer:
+        name: service-peer
+        port: 6667
+        target_port: 6667
+    secrets:
+      anchor:
+        tls:
+          cert: $(DeckhandCertificate.calico-etcd-anchor.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-anchor.spec)
+      tls:
+        client:
+          ca: $(DeckhandCertificateAuthority.calico-etcd.spec)
+        peer:
+          ca: $(DeckhandCertificateAuthority.calico-etcd-peer.spec)
+    service:
+      ip: $(PeglegCommonAddresses.common-addresses.spec.calico.etcd.service_ip)
+      name: calico-etcd
+  wait:
+    labels:
+      release_group: airship-kubernetes-calico-etcd
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kubernetes-calico-etcd-htk
+  namespace: pegleg
+spec:
+  chart_name: kubernetes-calico-etcd-htk
+  dependencies: []
+  release: kubernetes-calico-etcd-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.calico.etcd-htk)
+  values: {}

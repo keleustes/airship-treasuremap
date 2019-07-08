@@ -1,0 +1,48 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: memcached
+    name: openstack-memcached
+  name: openstack-memcached
+  namespace: openstack
+spec:
+  chart_name: openstack-memcached
+  dependencies:
+  - memcached-htk
+  install:
+    no_hooks: false
+  release: openstack-memcached
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 0714b9d7ae08a88565d2c81c1b185fd77efaafca
+    subpath: memcached
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-openstack-memcached
+        type: job
+  values:
+    endpoints:
+      oslo_cache:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        namespace: openstack
+        port:
+          memcache:
+            default: 11211
+    images:
+      tags: {}
+    labels:
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-openstack-memcached
+    timeout: 900

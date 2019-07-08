@@ -1,0 +1,10 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: osh-infra-radosgw
+  namespace: shipyard
+spec:
+  chart_group:
+  - osh-infra-radosgw
+  description: Deploy Radosgw for OSH-Infra

@@ -1,0 +1,7 @@
+apiVersion: deckhand.airshipit.org/v1alpha1
+kind: DeckhandPublicKey
+metadata:
+  name: airsloop-ssh-public-key
+  namespace: pegleg
+spec: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCycUyxcb+AJIOyU2fzJ0C0tj7UnWZkIAstdPOpeuHQejhezFFT46w3CA9tvr/XlrLu6Rwk7E8qLJvBCGUuZnE0dkRgwgjv6irjy90jA3sY9pdW5h+MxrlbLVNXOEsZbHzEK3sU7WfCpAuIEcxmL+F5+0h73BCqKNG5IiJKApmzPvwYoOxc1BuWguVrFjHqEhYUjMkJwyNRXy6Sfm0MiOVcdF7uvgK7tf25mGUaoyGWJYKTSJCOJ4M535BN5n3G8amTP3fcna1Ig8Rn9yDkGF5obe5TPB7zKuLNMp2bZW5YkSIQFRpm1RDHypXqNa0Lmr4pQyKNL+Auoq852D++XH43
+  airsloop@airship

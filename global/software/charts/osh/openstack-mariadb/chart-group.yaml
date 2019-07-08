@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  labels:
+    component: mariadb
+    name: openstack-mariadb-chart-group
+  name: openstack-mariadb
+  namespace: shipyard
+spec:
+  chart_group:
+  - openstack-mariadb
+  description: Deploy MariaDB

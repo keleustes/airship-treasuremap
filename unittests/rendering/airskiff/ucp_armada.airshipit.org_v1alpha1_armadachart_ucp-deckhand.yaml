@@ -1,0 +1,133 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-deckhand
+  name: ucp-deckhand
+  namespace: ucp
+spec:
+  chart_name: ucp-deckhand
+  dependencies:
+  - deckhand-htk
+  install:
+    no_hooks: false
+  release: ucp-deckhand
+  source:
+    location: /airship-components/deckhand
+    subpath: charts/deckhand
+    type: local
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-deckhand
+        type: job
+  values:
+    conf:
+      deckhand:
+        DEFAULT:
+          debug: true
+          use_stderr: true
+          use_syslog: true
+        keystone_authtoken:
+          memcache_security_strategy: None
+    endpoints:
+      deckhand:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: deckhand-int
+          public: deckhand-api
+        name: deckhand
+        path:
+          default: /api/v1.0
+        port:
+          api:
+            default: 9000
+        scheme:
+          default: http
+      identity:
+        auth:
+          admin:
+            password: password123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+          user:
+            password: password123
+            project_domain_name: default
+            project_name: service
+            region_name: RegionOne
+            role: admin
+            user_domain_name: default
+            username: deckhand
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: ucp
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      key_manager:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: barbican-api
+          public: barbican
+        name: barbican
+        path:
+          default: ""
+        port:
+          api:
+            default: 9311
+            public: 80
+        scheme:
+          default: http
+      oslo_cache:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        port:
+          memcache:
+            default: 11211
+      postgresql:
+        auth:
+          admin:
+            password: password123
+            username: postgres
+          user:
+            database: deckhand
+            password: password123
+            username: deckhand
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: postgresql
+        name: postgresql
+        path: /deckhand
+        port:
+          postgresql:
+            default: 5432
+        scheme: postgresql+psycopg2
+    images:
+      tags:
+        api: quay.io/airshipit/deckhand:latest-ubuntu_xenial
+    pod:
+      replicas:
+        deckhand: 1
+  wait:
+    labels:
+      release_group: airship-ucp-deckhand
+    timeout: 1800

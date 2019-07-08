@@ -1,0 +1,64 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-apiserver
+  name: kubernetes-apiserver
+  namespace: kube-system
+spec:
+  chart_name: apiserver
+  dependencies:
+  - kubernetes-apiserver-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-apiserver
+  source:
+    location: https://opendev.org/airship/promenade
+    reference: 44b5fae04788c6a28de0f9a2e132204561474d47
+    subpath: charts/apiserver
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-apiserver
+        type: job
+  values:
+    apiserver:
+      etcd:
+        endpoints: https://127.0.0.1:2378
+      tls:
+        tls-cipher-suites: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA
+        tls-min-version: VersionTLS12
+    command_prefix:
+    - /apiserver
+    - --service-cluster-ip-range=10.96.0.0/16
+    - --service-node-port-range=30000-32767
+    - --authorization-mode=Node,RBAC
+    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds
+    - --endpoint-reconciler-type=lease
+    - --feature-gates=PodShareProcessNamespace=true
+    images:
+      tags:
+        anchor: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+        apiserver: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+    network:
+      kubernetes_service_ip: 10.96.0.1
+      pod_cidr: 10.97.0.0/16
+    secrets:
+      etcd:
+        tls:
+          ca: $(DeckhandCertificateAuthority.kubernetes-etcd.spec)
+          cert: $(DeckhandCertificate.apiserver-etcd.spec)
+          key: $(DeckhandCertificateKey.apiserver-etcd.spec)
+      service_account:
+        public_key: $(DeckhandPublicKey.service-account.spec)
+      tls:
+        ca: $(DeckhandCertificateAuthority.kubernetes.spec)
+        cert: $(DeckhandCertificate.apiserver.spec)
+        key: $(DeckhandCertificateKey.apiserver.spec)
+  wait:
+    labels:
+      release_group: airship-kubernetes-apiserver
+    timeout: 600

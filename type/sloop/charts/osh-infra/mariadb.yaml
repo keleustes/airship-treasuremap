@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: osh-infra-mariadb
+  name: osh-infra-mariadb
+  namespace: osh-infra
+spec:
+  values:
+    pod:
+      replicas:
+        ingress: 1
+        server: 1

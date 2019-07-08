@@ -1,0 +1,11 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: openstack-heat
+  namespace: shipyard
+spec:
+  chart_group:
+  - heat-rabbitmq
+  - heat
+  sequenced: true

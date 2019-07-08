@@ -1,0 +1,72 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: haproxy
+  name: haproxy
+  namespace: kube-system
+spec:
+  chart_name: haproxy
+  dependencies:
+  - haproxy-htk
+  protected:
+    continue_processing: true
+  release: haproxy
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.haproxy)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-haproxy
+        type: job
+  values:
+    conf:
+      anchor:
+        kubernetes_url: https://$(PeglegCommonAddresses.common-addresses.spec.kubernetes.api_service_ip):443
+        services:
+          default:
+            kubernetes:
+              conf_parts:
+                backend:
+                - mode tcp
+                - option tcpka
+                - option tcp-check
+                - option redispatch
+                frontend:
+                - mode tcp
+                - option tcpka
+                - bind *:6553
+              server_opts: check port 6443
+          kube-system:
+            kubernetes-etcd:
+              conf_parts:
+                backend:
+                - mode tcp
+                - option tcpka
+                - option tcp-check
+                - option redispatch
+                frontend:
+                - mode tcp
+                - option tcpka
+                - bind *:2378
+              server_opts: check port 2379
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.haproxy)
+  wait:
+    labels:
+      release_group: airship-haproxy
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: haproxy-htk
+  namespace: pegleg
+spec:
+  chart_name: haproxy-htk
+  dependencies: []
+  release: haproxy-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.haproxy-htk)
+  values: {}

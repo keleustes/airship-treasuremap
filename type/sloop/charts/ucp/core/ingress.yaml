@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ingress
+  name: ucp-ingress
+  namespace: ucp
+spec:
+  values:
+    pod:
+      replicas:
+        error_page: 1
+        ingress: 1

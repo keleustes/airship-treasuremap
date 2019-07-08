@@ -1,0 +1,102 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-calico
+  name: kubernetes-calico
+  namespace: kube-system
+spec:
+  chart_name: calico
+  dependencies:
+  - calico-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-calico
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.calico.calico)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-calico
+        type: job
+  values:
+    conf:
+      cni_network_config:
+        cniVersion: 0.3.0
+        name: k8s-pod-network
+        plugins:
+        - etcd_ca_cert_file: /etc/calico/pki/ca
+          etcd_cert_file: /etc/calico/pki/crt
+          etcd_endpoints: __ETCD_ENDPOINTS__
+          etcd_key_file: /etc/calico/pki/key
+          ipam:
+            type: calico-ipam
+          kubernetes:
+            kubeconfig: __KUBECONFIG_FILEPATH__
+          log_level: info
+          policy:
+            type: k8s
+          type: calico
+        - capabilities:
+            portMappings: true
+          snat: true
+          type: portmap
+      controllers:
+        K8S_API: https://$(PeglegCommonAddresses.common-addresses.spec.kubernetes.api_service_ip):443
+      node:
+        CALICO_STARTUP_LOGLEVEL: INFO
+        CLUSTER_TYPE: k8s,bgp
+        ETCD_CA_CERT_FILE: /etc/calico/pki/ca
+        ETCD_CERT_FILE: /etc/calico/pki/crt
+        ETCD_KEY_FILE: /etc/calico/pki/key
+        IP_AUTODETECTION_METHOD: $(PeglegCommonAddresses.common-addresses.spec.calico.ip_autodetection_method)
+        WAIT_FOR_STORAGE: 'true'
+    endpoints:
+      etcd:
+        auth:
+          client:
+            tls:
+              ca: $(DeckhandCertificateAuthority.calico-etcd.spec)
+              crt: $(DeckhandCertificate.calico-node.spec)
+              key: $(DeckhandCertificateKey.calico-node.spec)
+        host_fqdn_override:
+          default: $(PeglegCommonAddresses.common-addresses.spec.calico.etcd.service_ip)
+        hosts:
+          default: calico-etcd
+        scheme:
+          default: https
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.calico.calico)
+    manifests:
+      daemonset_calico_etcd: false
+      job_image_repo_sync: false
+      service_calico_etcd: false
+    networking:
+      mtu: 1500
+      podSubnet: $(PeglegCommonAddresses.common-addresses.spec.kubernetes.pod_cidr)
+      settings:
+        ippool:
+          disabled: 'false'
+          ipip:
+            enabled: 'true'
+            mode: Always
+          nat_outgoing: 'true'
+        mesh: 'on'
+  wait:
+    labels:
+      release_group: airship-kubernetes-calico
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: calico-htk
+  namespace: pegleg
+spec:
+  chart_name: calico-htk
+  dependencies: []
+  release: calico-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.calico.calico-htk)
+  values: {}

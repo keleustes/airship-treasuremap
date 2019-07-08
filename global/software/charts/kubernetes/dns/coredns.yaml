@@ -1,0 +1,70 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: coredns
+  name: coredns
+  namespace: kube-system
+spec:
+  chart_name: coredns
+  dependencies:
+  - coredns-htk
+  release: coredns
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.coredns)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-coredns
+        type: job
+  values:
+    conf:
+      coredns:
+        corefile: |
+          .:53 {
+              errors
+              health
+              autopath @kubernetes
+              kubernetes $(PeglegCommonAddresses.common-addresses.spec.dns.cluster_domain) $(PeglegCommonAddresses.common-addresses.spec.kubernetes.service_cidr) $(PeglegCommonAddresses.common-addresses.spec.kubernetes.pod_cidr) {
+                pods insecure
+                fallthrough in-addr.arpa ip6.arpa
+                upstream $(PeglegCommonAddresses.common-addresses.spec.dns.upstream_servers[0])
+                upstream $(PeglegCommonAddresses.common-addresses.spec.dns.upstream_servers[1])
+                upstream $(PeglegCommonAddresses.common-addresses.spec.dns.upstream_servers[2])
+              }
+              prometheus :9153
+              forward . $(PeglegCommonAddresses.common-addresses.spec.dns.upstream_servers[0]) $(PeglegCommonAddresses.common-addresses.spec.dns.upstream_servers[1]) $(PeglegCommonAddresses.common-addresses.spec.dns.upstream_servers[2])
+              cache 30
+          }
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.coredns)
+    labels:
+      coredns:
+        node_selector_key: kube-dns
+        node_selector_value: enabled
+    service:
+      ip: $(PeglegCommonAddresses.common-addresses.spec.dns.service_ip)
+  wait:
+    labels:
+      release_group: airship-coredns
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: coredns-htk
+  namespace: pegleg
+spec:
+  chart_name: coredns-htk
+  dependencies: []
+  release: coredns-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.coredns-htk)
+  values:
+    manifests:
+      daemonset: true
+      deployment: true
+    pod:
+      replicas:
+        coredns: 2

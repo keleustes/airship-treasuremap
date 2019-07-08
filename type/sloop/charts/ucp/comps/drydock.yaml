@@ -1,0 +1,22 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-drydock
+  name: ucp-drydock
+  namespace: ucp
+spec:
+  values:
+    conf:
+      drydock:
+        database:
+          pool_size: 200
+        maasdriver:
+          maas_api_url: http://$(PeglegCommonAddresses.common-addresses.spec.genesis.ip):$(PeglegCommonAddresses.common-addresses.spec.node_ports.maas_api)/MAAS
+    network:
+      api:
+        nodeport:
+          enabled: true
+    replicas:
+      drydock: 1

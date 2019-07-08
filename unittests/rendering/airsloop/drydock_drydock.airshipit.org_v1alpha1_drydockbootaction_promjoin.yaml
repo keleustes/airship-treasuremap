@@ -1,0 +1,21 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockBootAction
+metadata:
+  labels:
+    application: drydock
+  name: promjoin
+  namespace: drydock
+spec:
+  assets:
+  - data_pipeline:
+    - utf8_decode
+    location: promenade+http://promenade-api.ucp.svc.cluster.local/api/v1.0/join-scripts?design_ref={{
+      action.design_ref | urlencode }}&hostname={{ node.hostname }}&ip={{ node.network.calico.ip
+      }}{% for k, v in node.labels.items() %}&labels.dynamic={{ k }}={{ v }}{% endfor
+      %}
+    location_pipeline:
+    - template
+    path: /opt/promjoin.sh
+    permissions: "555"
+    type: file
+  signaling: false

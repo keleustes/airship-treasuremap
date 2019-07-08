@@ -1,0 +1,155 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-barbican
+  name: ucp-barbican
+  namespace: ucp
+spec:
+  chart_name: ucp-barbican
+  dependencies:
+  - ucp-barbican-htk
+  install:
+    no_hooks: false
+  release: ucp-barbican
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.barbican)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-barbican
+        type: job
+  values:
+    conf:
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('ucp.barbican', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - 'null'
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_barbican:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: barbican
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - barbican
+    endpoints:
+      fluentd: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.fluentd)
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.keystone.admin)
+            password: $(DeckhandPassphrase.ucp-keystone-admin-password.spec)
+          barbican:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.barbican.keystone)
+            password: $(DeckhandPassphrase.ucp-barbican-keystone-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.identity)
+      key_manager: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.key_manager)
+      oslo_cache: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.oslo_cache)
+      oslo_db:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.ucp-oslo-db-admin-password.spec)
+          barbican:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.barbican.oslo_db)
+            password: $(DeckhandPassphrase.ucp-barbican-oslo-db-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.oslo_db)
+        path: /$(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.barbican.oslo_db.database)
+      oslo_messaging:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.ucp-oslo-messaging-password.spec)
+          barbican:
+            password: $(DeckhandPassphrase.ucp-oslo-messaging-password.spec)
+          parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.barbican.oslo_messaging)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.oslo_messaging)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.barbican)
+    labels:
+      api:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      test:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api: 2
+  wait:
+    labels:
+      release_group: airship-ucp-barbican
+    timeout: 300
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-barbican-htk
+  namespace: pegleg
+spec:
+  chart_name: ucp-barbican-htk
+  dependencies: []
+  release: ucp-barbican-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.barbican-htk)
+  values: {}

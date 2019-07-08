@@ -1,0 +1,24 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockBaremetalNode
+metadata:
+  name: cab23-r720-13
+  namespace: drydock
+spec:
+  addressing:
+  - address: 10.23.104.13
+    network: oob
+  - address: 10.23.20.13
+    network: pxe
+  - address: 10.23.21.13
+    network: oam
+  - address: 10.23.23.13
+    network: storage
+  - address: 10.23.24.13
+    network: overlay
+  - address: 10.23.22.13
+    network: calico
+  host_profile: cp_r720-primary
+  metadata:
+    rack: cab23
+    tags:
+    - masters

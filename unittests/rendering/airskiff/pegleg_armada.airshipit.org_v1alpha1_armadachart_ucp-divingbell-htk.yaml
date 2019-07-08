@@ -1,0 +1,15 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-divingbell-htk
+  namespace: pegleg
+spec:
+  chart_name: ucp-divingbell-htk
+  dependencies: []
+  release: ucp-divingbell-htk
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 09ae22d8493d5cef34c80cb69117c69dc0f2dc8e
+    subpath: helm-toolkit
+    type: git
+  values: {}

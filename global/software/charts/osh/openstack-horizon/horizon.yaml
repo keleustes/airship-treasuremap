@@ -1,0 +1,73 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: horizon
+    name: horizon
+  name: horizon
+  namespace: openstack
+spec:
+  chart_name: horizon
+  dependencies:
+  - horizon-htk
+  install:
+    no_hooks: false
+  release: horizon
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.horizon)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-horizon
+        type: job
+  values:
+    endpoints:
+      dashboard: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.dashboard)
+      identity:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+      oslo_cache:
+        auth:
+          memcache_secret_key: $(DeckhandPassphrase.osh-oslo-cache-secret-key.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_cache)
+      oslo_db:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-oslo-db-admin-password.spec)
+          horizon: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.horizon.oslo_db)
+          keystone:
+            password: $(DeckhandPassphrase.osh-horizon-oslo-db-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-service-accounts.spec.osh.horizon.oslo_db.database)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.horizon)
+    labels:
+      #TODO(jeb):
+      horizon:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        server: 2
+  wait:
+    labels:
+      release_group: airship-horizon
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: horizon-htk
+  namespace: pegleg
+spec:
+  chart_name: horizon-htk
+  dependencies: []
+  release: horizon-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.horizon-htk)
+  values: {}

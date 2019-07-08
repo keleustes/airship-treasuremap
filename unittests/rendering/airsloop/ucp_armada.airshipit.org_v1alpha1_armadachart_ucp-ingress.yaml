@@ -1,0 +1,52 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ingress
+  name: ucp-ingress
+  namespace: ucp
+spec:
+  chart_name: ingress
+  dependencies:
+  - ucp-ingress-htk
+  install:
+    no_hooks: false
+  release: ingress
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 596732f16bf7cfe681ce0bb2d62e529bea5eea82
+    subpath: ingress
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ingress
+        type: job
+  values:
+    conf:
+      ingress:
+        proxy-body-size: 20m
+    images:
+      tags: {}
+    labels:
+      error_server:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    network:
+      ingress:
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-body-size: 20m
+          nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    pod:
+      replicas:
+        error_page: 1
+        ingress: 1
+  wait:
+    labels:
+      release_group: airship-ingress
+    timeout: 300

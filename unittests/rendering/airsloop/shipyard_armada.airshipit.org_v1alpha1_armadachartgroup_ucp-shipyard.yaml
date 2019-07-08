@@ -1,0 +1,11 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  labels:
+    name: ucp-shipyard-chart-group
+  name: ucp-shipyard
+  namespace: shipyard
+spec:
+  chart_group:
+  - ucp-shipyard
+  description: Shipyard

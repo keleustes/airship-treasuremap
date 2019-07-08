@@ -1,0 +1,17 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaManifest
+metadata:
+  labels:
+    name: full-site
+  name: full-site
+  namespace: shipyard
+spec:
+  chart_groups:
+  - openstack-ingress-controller
+  - openstack-mariadb
+  - openstack-memcached
+  - openstack-keystone
+  - openstack-glance
+  - openstack-compute-kit
+  - openstack-heat
+  release_prefix: airship

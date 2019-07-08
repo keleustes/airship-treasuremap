@@ -1,0 +1,13 @@
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockRegion
+metadata:
+  name: airskiff
+  namespace: drydock
+spec:
+  authorized_keys:
+  - $(DeckhandPublicKey.airship-ssh-public-key.spec)
+  repositories:
+    main_archive: $(PeglegSoftwareVersions.software-versions.spec.packages.repositories.main_archive)
+    #TODO(jeb) remove_unlisted: true
+  tag_definitions: []

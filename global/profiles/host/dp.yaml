@@ -1,0 +1,54 @@
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockHostProfile
+metadata:
+  labels:
+    hosttype: dp
+  name: dp
+  namespace: drydock
+spec:
+  metadata:
+    owner_data:
+      beta.kubernetes.io/fluentd-ds-ready: 'true'
+      contrail-vrouter: kernel
+      fluentbit: enabled
+      node-exporter: enabled
+      openstack-libvirt: kernel
+      openstack-nova-compute: enabled
+      openvswitch: enabled
+      tenant-ceph-osd: enabled
+  oob:
+    account: root
+    credential: $(DeckhandPassphrase.ipmi-admin-password.spec)
+    network: oob
+    type: ipmi
+  platform:
+    image: xenial
+    kernel: hwe-16.04
+    kernel_params:
+      kernel_package: linux-image-4.15.0-34-generic
+  storage:
+    physical_devices:
+      sda:
+        labels:
+          bootdrive: 'true'
+        partitions:
+        - bootable: true
+          filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /
+          name: root
+          size: 30g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /boot
+          name: boot
+          size: 1g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /var
+          name: var
+          size: '>100g'

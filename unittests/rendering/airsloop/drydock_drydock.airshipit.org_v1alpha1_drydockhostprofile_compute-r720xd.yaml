@@ -1,0 +1,60 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockHostProfile
+metadata:
+  name: compute-r720xd
+  namespace: drydock
+spec:
+  hardware_profile: dell_r720xd
+  interfaces:
+    data:
+      device_link: data
+      networks:
+      - oam
+      - storage
+      - overlay
+      - calico
+      slaves:
+      - data_nic01
+    pxe:
+      device_link: pxe
+      networks:
+      - pxe
+      slaves:
+      - pxe_nic01
+  platform:
+    image: xenial
+    kernel: ga-16.04
+    kernel_params:
+      kernel_package: linux-image-4.4.0-137-generic
+  primary_network: oam
+  storage:
+    physical_devices:
+      bootdisk:
+        labels:
+          bootdrive: "true"
+        partitions:
+        - bootable: true
+          filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /
+          name: root
+          size: 30g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /boot
+          name: boot
+          size: 1g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /var/log
+          name: var_log
+          size: 100g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /var
+          name: var
+          size: '>100g'

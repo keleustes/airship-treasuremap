@@ -1,0 +1,207 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: neutron
+    name: neutron
+  name: neutron
+  namespace: openstack
+spec:
+  chart_name: neutron
+  dependencies:
+  - neutron-htk
+  install:
+    no_hooks: false
+  release: neutron
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.neutron)
+  test:
+    timeout: 500
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-neutron
+        type: job
+  values:
+    conf:
+      auto_bridge_add:
+        br-ex: $(PeglegCommonAddresses.common-addresses.spec.neutron.external_iface)
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.neutron', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - 'null'
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_neutron:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: neutron
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - neutron
+      metadata_agent:
+        DEFAULT:
+          metadata_proxy_shared_secret: $(DeckhandPassphrase.osh-nova-metadata-proxy-shared-secret.spec)
+      neutron:
+        DEFAULT:
+          dhcp_agents_per_network: 2
+          l3_ha: true
+          l3_ha_network_type: vxlan
+          max_l3_agents_per_router: 3
+        oslo_messaging_rabbit:
+          heartbeat_timeout_threshold: 0
+      plugins:
+        ml2_conf:
+          ml2:
+            extension_drivers: port_security
+            mechanism_drivers: l2population,openvswitch
+            tenant_network_types: vxlan
+            type_drivers: vlan,flat,vxlan
+          ml2_type_vlan:
+            network_vlan_ranges: external
+    endpoints:
+      compute: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.compute)
+      fluentd: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.fluentd)
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.admin)
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+          neutron:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.neutron.neutron)
+            password: $(DeckhandPassphrase.osh-neutron-password.spec)
+          nova:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.nova)
+            password: $(DeckhandPassphrase.osh-nova-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+      image_registry: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.compute_metadata)
+      network: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.network)
+      oslo_cache:
+        auth:
+          memcache_secret_key: $(DeckhandPassphrase.osh-oslo-cache-secret-key.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_cache)
+      oslo_db:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-oslo-db-admin-password.spec)
+          neutron:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.neutron.oslo_db)
+            password: $(DeckhandPassphrase.osh-neutron-oslo-db-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-service-accounts.spec.osh.neutron.oslo_db.database)
+      oslo_messaging:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.neutron.oslo_messaging.admin)
+            password: $(DeckhandPassphrase.osh-neutron-oslo-messaging-admin-password.spec)
+          neutron:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.neutron.oslo_messaging.neutron)
+            password: $(DeckhandPassphrase.osh-neutron-oslo-messaging-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.neutron_oslo_messaging)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.neutron)
+    labels:
+      #TODO(jeb): One of a kind
+      agent_dhcp:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      agent_l3:
+        node_selector_key: openstack-l3-agent
+        node_selector_value: enabled
+      agent_metadata:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      lb:
+        node_selector_key: linuxbridge
+        node_selector_value: enabled
+      ovs:
+        node_selector_key: openvswitch
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      test:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    network:
+      interface:
+        tunnel: $(PeglegCommonAddresses.common-addresses.spec.neutron.tunnel_device)
+    pod:
+      replicas:
+        server: 2
+  wait:
+    labels:
+      release_group: airship-neutron
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: neutron-htk
+  namespace: pegleg
+spec:
+  chart_name: neutron-htk
+  dependencies: []
+  release: neutron-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.neutron-htk)
+  values: {}

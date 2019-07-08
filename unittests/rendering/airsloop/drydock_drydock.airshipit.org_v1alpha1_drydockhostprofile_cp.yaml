@@ -1,0 +1,104 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockHostProfile
+metadata:
+  labels:
+    hosttype: cp
+  name: cp
+  namespace: drydock
+spec:
+  metadata:
+    owner_data:
+      IAM: enabled
+      beta.kubernetes.io/fluentd-ds-ready: "true"
+      calico-etcd: enabled
+      calico-node: enabled
+      calico-policy: enabled
+      ceph-mds: enabled
+      ceph-mgr: enabled
+      ceph-mon: enabled
+      ceph-osd: enabled
+      ceph-rgw: enabled
+      control-plane: enabled
+      elasticsearch-client: enabled
+      elasticsearch-data: enabled
+      elasticsearch-master: enabled
+      fluentbit: enabled
+      fluentd: enabled
+      influxdb: enabled
+      kibana: enabled
+      kube-dns: enabled
+      kube-etcd: enabled
+      kube-ingress: enabled
+      kubernetes-apiserver: enabled
+      kubernetes-controller-manager: enabled
+      kubernetes-etcd: enabled
+      kubernetes-scheduler: enabled
+      maas-rack: enabled
+      maas-region: enabled
+      node-exporter: enabled
+      openstack-cinder-control: enabled
+      openstack-cinder-volume: control
+      openstack-control-plane: enabled
+      openstack-dns-helper: enabled
+      openstack-etcd: enabled
+      openstack-glance: enabled
+      openstack-heat: enabled
+      openstack-horizon: enabled
+      openstack-keystone: enabled
+      openstack-mariadb: enabled
+      openstack-memcached: enabled
+      openstack-mistral: enabled
+      openstack-neutron: enabled
+      openstack-nova-control: enabled
+      openstack-rabbitmq: enabled
+      openvswitch: enabled
+      postgresql: enabled
+      prometheus-client: enabled
+      prometheus-server: enabled
+      tenant-ceph-control-plane: enabled
+      tenant-ceph-mgr: enabled
+      tenant-ceph-mon: enabled
+      tenant-ceph-rgw: enabled
+      tiller-helm: enabled
+      ucp-armada: enabled
+      ucp-barbican: enabled
+      ucp-control-plane: enabled
+      ucp-deckhand: enabled
+      ucp-drydock: enabled
+      ucp-promenade: enabled
+      ucp-shipyard: enabled
+  oob:
+    account: root
+    credential: airsloop123
+    network: oob
+    type: ipmi
+  platform:
+    image: xenial
+    kernel: hwe-16.04
+    kernel_params:
+      kernel_package: linux-image-4.15.0-34-generic
+  storage:
+    physical_devices:
+      sda:
+        labels:
+          bootdrive: "true"
+        partitions:
+        - bootable: true
+          filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /
+          name: root
+          size: 30g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /boot
+          name: boot
+          size: 1g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /var
+          name: var
+          size: '>100g'

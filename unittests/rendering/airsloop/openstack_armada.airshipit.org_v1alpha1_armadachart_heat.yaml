@@ -1,0 +1,285 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: heat
+    name: heat
+  name: heat
+  namespace: openstack
+spec:
+  chart_name: heat
+  dependencies:
+  - heat-htk
+  install:
+    no_hooks: false
+  release: heat
+  source:
+    location: https://opendev.org/openstack/openstack-helm
+    reference: 47cb52b67c016aa364db9599db39fef719e4ae07
+    subpath: heat
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-heat
+        type: job
+  values:
+    conf:
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.heat', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - "null"
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_heat:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: heat
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - heat
+    endpoints:
+      cloudformation:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: heat-cfn
+          public: cloudformation
+        name: heat-cfn
+        path:
+          default: ""
+        port:
+          api:
+            default: 8000
+            public: 80
+        scheme:
+          default: http
+          public: http
+      cloudwatch:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: heat-cloudwatch
+          public: cloudwatch
+        name: heat-cloudwatch
+        path:
+          default: ""
+        port:
+          api:
+            default: 8003
+            public: 80
+        scheme:
+          default: http
+      fluentd:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: fluentd-logging
+        name: fluentd
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          metrics:
+            default: 24220
+          service:
+            default: 24224
+        scheme:
+          default: http
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: airsloop
+            user_domain_name: default
+            username: admin
+          heat:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: airsloop
+            role: admin
+            user_domain_name: default
+            username: heat
+          heat_stack_user:
+            domain_name: heat
+            password: airsloop123
+            region_name: airsloop
+            role: admin
+            username: heat-domain
+          heat_trustee:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: airsloop
+            role: admin
+            user_domain_name: default
+            username: heat-trust
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: openstack
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      orchestration:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: heat-api
+          public: heat
+        name: heat
+        path:
+          default: /v1/%(project_id)s
+        port:
+          api:
+            default: 8004
+            public: 80
+        scheme:
+          default: http
+          public: http
+      oslo_cache:
+        auth:
+          memcache_secret_key: airsloop123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        namespace: openstack
+        port:
+          memcache:
+            default: 11211
+      oslo_db:
+        auth:
+          admin:
+            password: airsloop123
+          heat:
+            database: heat
+            password: airsloop123
+            username: heat
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /heat
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+      oslo_messaging:
+        auth:
+          admin:
+            password: airsloop123
+            username: heat-rabbitmq-admin
+          heat:
+            password: airsloop123
+            username: heat-rabbitmq-user
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: heat-rabbitmq
+        namespace: openstack
+        path: /heat
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: rabbit
+    images:
+      tags: {}
+    labels:
+      api:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      cfn:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      cloudwatch:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      engine:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api: 1
+        cfn: 1
+        cloudwatch: 1
+        engine: 1
+  wait:
+    labels:
+      release_group: airship-heat
+    timeout: 900

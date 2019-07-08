@@ -1,0 +1,116 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: grafana
+  name: grafana
+  namespace: osh-infra
+spec:
+  chart_name: grafana
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: grafana
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh_infra.grafana)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-grafana
+        type: job
+  values:
+    conf:
+      ldap:
+        config:
+          base_dns:
+            group_search: OU=Groups,DC=$(PeglegCommonAddresses.common-addresses.spec.ldap.subdomain),DC=$(PeglegCommonAddresses.common-addresses.spec.ldap.domain),DC=com
+            search: DC=$(PeglegCommonAddresses.common-addresses.spec.ldap.subdomain),DC=$(PeglegCommonAddresses.common-addresses.spec.ldap.domain),DC=com
+          filters:
+            group_search: (memberof=CN=$(PeglegCommonAddresses.common-addresses.spec.ldap.common_name),OU=Application,OU=Groups,DC=$(PeglegCommonAddresses.common-addresses.spec.ldap.subdomain),DC=$(PeglegCommonAddresses.common-addresses.spec.ldap.domain),DC=com)
+            search: (sAMAccountName=%s)
+        template: |
+          verbose_logging = true
+          [[servers]]
+          host = "{{ tuple "ldap" "public" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" }}"
+          port = {{ tuple "ldap" "public" "ldap" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+          use_ssl = false
+          start_tls = false
+          ssl_skip_verify = false
+          bind_dn = "{{ .Values.endpoints.ldap.auth.admin.bind_dn }}"
+          bind_password = '{{ .Values.endpoints.ldap.auth.admin.password }}'
+          search_filter = "{{ .Values.conf.ldap.config.filters.search }}"
+          search_base_dns = ["{{ .Values.conf.ldap.config.base_dns.search }}"]
+          group_search_base_dns = ["{{ .Values.conf.ldap.config.base_dns.group_search }}"]
+          [servers.attributes]
+          username = "sAMAccountName"
+          surname = "sn"
+          member_of = "memberof"
+          email = "mail"
+          [[servers.group_mappings]]
+          group_dn = "{{.Values.endpoints.ldap.auth.admin.bind_dn }}"
+          org_role = "Admin"
+          [[servers.group_mappings]]
+          group_dn = "*"
+          org_role = "Viewer"
+      provisioning:
+        datasources:
+          monitoring:
+            url: http://prom-metrics.osh-infra.svc.cluster.local:80/
+    endpoints:
+      grafana:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.grafana.admin)
+            password: $(DeckhandPassphrase.osh-infra-grafana-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.grafana)
+      ldap:
+        auth:
+          admin:
+            bind_dn: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.ldap.admin.bind)
+            password: $(DeckhandPassphrase.osh-keystone-ldap-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.ldap)
+      monitoring:
+        auth:
+          user:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.prometheus.admin)
+            password: $(DeckhandPassphrase.osh-infra-prometheus-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.monitoring)
+      oslo_db:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-infra-oslo-db-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.grafana.oslo_db)
+            password: $(DeckhandPassphrase.osh-infra-grafana-oslo-db-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.grafana.oslo_db.database)
+      oslo_db_session:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-infra-oslo-db-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.grafana.oslo_db_session)
+            password: $(DeckhandPassphrase.osh-infra-grafana-oslo-db-session-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.grafana.oslo_db_session.database)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh_infra.grafana)
+    labels:
+      grafana:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        grafana: 2
+  wait:
+    labels:
+      release_group: airship-grafana
+    timeout: 900

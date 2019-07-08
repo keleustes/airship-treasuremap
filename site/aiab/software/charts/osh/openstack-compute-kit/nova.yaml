@@ -1,0 +1,15 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: nova
+  namespace: openstack
+spec:
+  values:
+    conf:
+      ceph:
+        enabled: false
+      nova:
+        libvirt:
+          cpu_mode: host-model
+          virt_type: qemu

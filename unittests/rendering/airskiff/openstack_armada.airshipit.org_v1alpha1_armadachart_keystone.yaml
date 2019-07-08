@@ -1,0 +1,229 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: keystone
+    name: keystone
+  name: keystone
+  namespace: openstack
+spec:
+  chart_name: keystone
+  dependencies:
+  - keystone-htk
+  install:
+    no_hooks: false
+  release: keystone
+  source:
+    location: https://opendev.org/openstack/openstack-helm
+    reference: 47cb52b67c016aa364db9599db39fef719e4ae07
+    subpath: keystone
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-keystone
+        type: job
+  values:
+    bootstrap:
+      script: |
+        openstack role create --or-show _member_
+        openstack role add \
+              --user="${OS_USERNAME}" \
+              --user-domain="${OS_USER_DOMAIN_NAME}" \
+              --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
+              --project="${OS_PROJECT_NAME}" \
+              "_member_"
+
+        #NOTE(portdirect): required for all users who operate heat stacks
+        openstack role create --or-show heat_stack_owner
+        openstack role add \
+              --user="${OS_USERNAME}" \
+              --user-domain="${OS_USER_DOMAIN_NAME}" \
+              --project-domain="${OS_PROJECT_DOMAIN_NAME}" \
+              --project="${OS_PROJECT_NAME}" \
+              "heat_stack_owner"
+    conf:
+      keystone:
+        identity:
+          default_domain_id: default
+          domain_config_dir: /etc/keystonedomains
+          domain_configurations_from_database: true
+          domain_specific_drivers_enabled: true
+          driver: sql
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.keystone', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - "null"
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_keystone:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: keystone
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - keystone
+    endpoints:
+      fluentd:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: fluentd-logging
+        name: fluentd
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          metrics:
+            default: 24220
+          service:
+            default: 24224
+        scheme:
+          default: http
+      identity:
+        auth:
+          admin:
+            password: password123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: openstack
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      oslo_cache:
+        auth:
+          memcache_secret_key: password123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        namespace: openstack
+        port:
+          memcache:
+            default: 11211
+      oslo_db:
+        auth:
+          admin:
+            password: password123
+          keystone:
+            database: keystone
+            password: password123
+            username: keystone
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /keystone
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+      oslo_messaging:
+        auth:
+          admin:
+            password: password123
+            username: keystone-rabbitmq-admin
+          keystone:
+            password: password123
+            username: keystone-rabbitmq-user
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: keystone-rabbitmq
+        namespace: openstack
+        path: /keystone
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: rabbit
+    images:
+      tags: {}
+    labels:
+      api:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api: 1
+  wait:
+    labels:
+      release_group: airship-keystone
+    timeout: 900

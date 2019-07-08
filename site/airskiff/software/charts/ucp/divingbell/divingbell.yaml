@@ -1,0 +1,22 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-divingbell
+  name: ucp-divingbell
+  namespace: ucp
+spec:
+  values:
+    conf:
+      uamlite:
+        users:
+        - user_crypt_passwd: $(DeckhandPassphrase.ubuntu-crypt-password.spec)
+          user_name: ubuntu
+          user_sshkeys:
+          - $(DeckhandPublicKey.airship-ssh-public-key.spec)
+          user_sudo: true
+        - user_name: airship
+          user_sshkeys:
+          - $(DeckhandPublicKey.airship-ssh-public-key.spec)
+          user_sudo: true

@@ -1,0 +1,177 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: grafana
+  name: grafana
+  namespace: osh-infra
+spec:
+  chart_name: grafana
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: grafana
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 5e1ecd9840397bf9e8829ce0d98fcb721db1b74e
+    subpath: grafana
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-grafana
+        type: job
+  values:
+    conf:
+      ldap:
+        config:
+          base_dns:
+            group_search: OU=Groups,DC=test,DC=example,DC=com
+            search: DC=test,DC=example,DC=com
+          filters:
+            group_search: (memberof=CN=test,OU=Application,OU=Groups,DC=test,DC=example,DC=com)
+            search: (sAMAccountName=%s)
+        template: |
+          verbose_logging = true
+          [[servers]]
+          host = "{{ tuple "ldap" "public" . | include "helm-toolkit.endpoints.hostname_fqdn_endpoint_lookup" }}"
+          port = {{ tuple "ldap" "public" "ldap" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}
+          use_ssl = false
+          start_tls = false
+          ssl_skip_verify = false
+          bind_dn = "{{ .Values.endpoints.ldap.auth.admin.bind_dn }}"
+          bind_password = '{{ .Values.endpoints.ldap.auth.admin.password }}'
+          search_filter = "{{ .Values.conf.ldap.config.filters.search }}"
+          search_base_dns = ["{{ .Values.conf.ldap.config.base_dns.search }}"]
+          group_search_base_dns = ["{{ .Values.conf.ldap.config.base_dns.group_search }}"]
+          [servers.attributes]
+          username = "sAMAccountName"
+          surname = "sn"
+          member_of = "memberof"
+          email = "mail"
+          [[servers.group_mappings]]
+          group_dn = "{{.Values.endpoints.ldap.auth.admin.bind_dn }}"
+          org_role = "Admin"
+          [[servers.group_mappings]]
+          group_dn = "*"
+          org_role = "Viewer"
+      provisioning:
+        datasources:
+          monitoring:
+            url: http://prom-metrics.osh-infra.svc.cluster.local:80/
+    endpoints:
+      grafana:
+        auth:
+          admin:
+            password: airsloop123
+            username: grafana
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: grafana-dashboard
+          public: grafana
+        name: grafana
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          grafana:
+            default: 3000
+            public: 80
+        scheme:
+          default: http
+          public: http
+      ldap:
+        auth:
+          admin:
+            bind_dn: test@ldap.example.com
+            password: airsloop123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ldap
+        path:
+          default: /DC=test,DC=test,DC=com?sAMAccountName?sub?memberof=CN=test,OU=Application,OU=Groups,DC=test,DC=test,DC=com
+        port:
+          ldap:
+            default: 389
+        scheme:
+          default: ldap
+      monitoring:
+        auth:
+          user:
+            password: airsloop123
+            username: prometheus
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: prom-metrics
+          public: prometheus
+        name: prometheus
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          api:
+            default: 9090
+          http:
+            default: 80
+        scheme:
+          default: http
+      oslo_db:
+        auth:
+          admin:
+            password: airsloop123
+          user:
+            database: grafana
+            password: airsloop123
+            username: grafana
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+        namespace: osh-infra
+        path: /grafana
+        port:
+          mysql:
+            default: 3306
+        scheme: mysql+pymysql
+      oslo_db_session:
+        auth:
+          admin:
+            password: airsloop123
+          user:
+            database: grafana_session
+            password: airsloop123
+            username: grafana_session
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+        namespace: osh-infra
+        path: /grafana_session
+        port:
+          mysql:
+            default: 3306
+        scheme: mysql+pymysql
+    images:
+      tags: {}
+    labels:
+      grafana:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        grafana: 1
+  wait:
+    labels:
+      release_group: airship-grafana
+    timeout: 900

@@ -1,0 +1,46 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: prometheus-openstack-exporter
+  namespace: openstack
+spec:
+  chart_name: prometheus-openstack-exporter
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: prometheus-openstack-exporter
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh_infra.prometheus_openstack_exporter)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-prometheus-openstack-exporter
+        type: job
+  values:
+    endpoints:
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.admin)
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.prometheus_openstack_exporter.user)
+            password: $(DeckhandPassphrase.osh-infra-openstack-exporter-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+      prometheus_openstack_exporter: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.prometheus_openstack_exporter)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh_infra.prometheus_openstack_exporter)
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      openstack_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-prometheus-openstack-exporter
+    timeout: 900

@@ -1,0 +1,15 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-drydock
+  name: ucp-drydock
+  namespace: ucp
+spec:
+  values:
+    network:
+      api:
+        ingress:
+          classes:
+            cluster: maas-ingress

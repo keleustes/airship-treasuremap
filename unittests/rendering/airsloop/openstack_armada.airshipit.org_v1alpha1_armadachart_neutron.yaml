@@ -1,0 +1,313 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: neutron
+    name: neutron
+  name: neutron
+  namespace: openstack
+spec:
+  chart_name: neutron
+  dependencies:
+  - neutron-htk
+  install:
+    no_hooks: false
+  release: neutron
+  source:
+    location: https://opendev.org/openstack/openstack-helm
+    reference: 47cb52b67c016aa364db9599db39fef719e4ae07
+    subpath: neutron
+    type: git
+  test:
+    timeout: 500
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-neutron
+        type: job
+  values:
+    conf:
+      auto_bridge_add:
+        br-ex: enp67s0f0
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.neutron', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - "null"
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_neutron:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: neutron
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - neutron
+      metadata_agent:
+        DEFAULT:
+          metadata_proxy_shared_secret: password123
+      neutron:
+        DEFAULT:
+          dhcp_agents_per_network: 2
+          l3_ha: true
+          l3_ha_network_type: vxlan
+          max_l3_agents_per_router: 3
+        oslo_messaging_rabbit:
+          heartbeat_timeout_threshold: 0
+      plugins:
+        ml2_conf:
+          ml2:
+            extension_drivers: port_security
+            mechanism_drivers: l2population,openvswitch
+            tenant_network_types: vxlan
+            type_drivers: vlan,flat,vxlan
+          ml2_type_vlan:
+            network_vlan_ranges: external
+    endpoints:
+      compute:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-api
+          public: nova
+        name: nova
+        path:
+          default: /v2/%(tenant_id)s
+        port:
+          api:
+            default: 8774
+            public: 80
+          novncproxy:
+            default: 80
+        scheme:
+          default: http
+          public: http
+      fluentd:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: fluentd-logging
+        name: fluentd
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          metrics:
+            default: 24220
+          service:
+            default: 24224
+        scheme:
+          default: http
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: airsloop
+            user_domain_name: default
+            username: admin
+          neutron:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: airsloop
+            role: admin
+            user_domain_name: default
+            username: neutron
+          nova:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: airsloop
+            role: admin
+            user_domain_name: default
+            username: nova
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: openstack
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      image_registry:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-metadata
+          public: metadata
+        name: nova
+        path:
+          default: /
+        port:
+          metadata:
+            default: 8775
+            public: 80
+        scheme:
+          default: http
+      network:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: neutron-server
+          public: neutron
+        name: neutron
+        path:
+          default: ""
+        port:
+          api:
+            default: 9696
+            public: 80
+        scheme:
+          default: http
+          public: http
+      oslo_cache:
+        auth:
+          memcache_secret_key: airsloop123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        namespace: openstack
+        port:
+          memcache:
+            default: 11211
+      oslo_db:
+        auth:
+          admin:
+            password: airsloop123
+          neutron:
+            database: neutron
+            password: airsloop123
+            username: neutron
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /neutron
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+      oslo_messaging:
+        auth:
+          admin:
+            password: airsloop123
+            username: neutron-rabbitmq-admin
+          neutron:
+            password: airsloop123
+            username: neutron-rabbitmq-user
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: neutron-rabbitmq
+        namespace: openstack
+        path: /neutron
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: rabbit
+    images:
+      tags: {}
+    labels:
+      agent_dhcp:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      agent_l3:
+        node_selector_key: openstack-l3-agent
+        node_selector_value: enabled
+      agent_metadata:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      lb:
+        node_selector_key: linuxbridge
+        node_selector_value: enabled
+      ovs:
+        node_selector_key: openvswitch
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      test:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    network:
+      interface:
+        tunnel: enp67s0f0.74
+    pod:
+      replicas:
+        server: 1
+  wait:
+    labels:
+      release_group: airship-neutron

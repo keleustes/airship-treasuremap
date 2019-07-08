@@ -1,0 +1,31 @@
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-armada-operator
+subjects:
+- kind: ServiceAccount
+  name: armada-operator
+  namespace: ceph
+- kind: ServiceAccount
+  name: armada-operator
+  namespace: deckhand
+- kind: ServiceAccount
+  name: armada-operator
+  namespace: nfs
+- kind: ServiceAccount
+  name: armada-operator
+  namespace: openstack
+- kind: ServiceAccount
+  name: armada-operator
+  namespace: osh-infra
+- kind: ServiceAccount
+  name: armada-operator
+  namespace: tenant-ceph
+- kind: ServiceAccount
+  name: armada-operator
+  namespace: ucp
+roleRef:
+  kind: ClusterRole
+  name: cluster-armada-operator
+  apiGroup: rbac.authorization.k8s.io

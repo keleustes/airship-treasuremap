@@ -1,0 +1,95 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: tenant-ceph-osd
+  name: tenant-ceph-osd
+  namespace: tenant-ceph
+spec:
+  chart_name: tenant-ceph-osd
+  dependencies:
+  - tenant-ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: tenant-ceph-osd
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-osd
+    type: git
+  upgrade:
+    no_hooks: false
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: 29d8953d-0bb6-4ba1-a48a-f9be1c0937a9
+        osd:
+          osd_op_num_threads_per_hdd: 2
+          osd_op_num_threads_per_ssd: 4
+      osd:
+        osd_crush_chooseleaf_type: 0
+      storage:
+        mon:
+          directory: /var/lib/openstack-helm/tenant-ceph/mon
+        osd:
+        - data:
+            location: /dev/sde
+            type: block-logical
+          journal:
+            location: /dev/sdb1
+            type: block-logical
+        - data:
+            location: /dev/sdf
+            type: block-logical
+          journal:
+            location: /dev/sdb2
+            type: block-logical
+        - data:
+            location: /dev/sdg
+            type: block-logical
+          journal:
+            location: /dev/sdc1
+            type: block-logical
+        - data:
+            location: /dev/sdh
+            type: block-logical
+          journal:
+            location: /dev/sdc2
+            type: block-logical
+        osd_log_directory: /var/log/tenant-ceph
+    endpoints:
+      ceph_mgr:
+        namespace: tenant-ceph
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: tenant-ceph
+        port:
+          mon:
+            default: 6790
+      fluentd:
+        namespace: osh-infra
+    images:
+      tags: {}
+    labels:
+      osd:
+        node_selector_key: tenant-ceph-osd
+        node_selector_value: enabled
+    monitoring:
+      ceph_mgr:
+        port: 9284
+    network:
+      cluster: 10.23.23.0/24
+      public: 10.23.23.0/24
+  wait:
+    labels:
+      release_group: airship-tenant-ceph-osd
+    timeout: 900

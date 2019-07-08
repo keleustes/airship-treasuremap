@@ -1,0 +1,140 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: nagios
+  namespace: osh-infra
+spec:
+  chart_name: nagios
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: nagios
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 5e1ecd9840397bf9e8829ce0d98fcb721db1b74e
+    subpath: nagios
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-nagios
+        type: job
+  values:
+    conf:
+      apache:
+        host: |
+          <VirtualHost *:80>
+            <Location />
+                ProxyPass http://localhost:{{ tuple "nagios" "internal" "nagios" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}/
+                ProxyPassReverse http://localhost:{{ tuple "nagios" "internal" "nagios" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}/
+            </Location>
+            <Proxy *>
+                AuthName "Nagios"
+                AuthType Basic
+                AuthBasicProvider file ldap
+                AuthUserFile /usr/local/apache2/conf/.htpasswd
+                AuthLDAPBindDN {{ .Values.endpoints.ldap.auth.admin.bind }}
+                AuthLDAPBindPassword {{ .Values.endpoints.ldap.auth.admin.password }}
+                AuthLDAPURL {{ tuple "ldap" "public" "ldap" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+                Require valid-user
+            </Proxy>
+          </VirtualHost>
+    endpoints:
+      elasticsearch:
+        auth:
+          admin:
+            password: airsloop123
+            username: elasticsearch
+        host_fqdn_override:
+          default: ""
+        hosts:
+          data: elasticsearch-data
+          default: elasticsearch-logging
+          discovery: elasticsearch-discovery
+          public: elasticsearch
+        name: elasticsearch
+        namespace: osh-infra
+        path:
+          default: ""
+        scheme:
+          default: http
+      ldap:
+        auth:
+          admin:
+            bind: test@ldap.example.com
+            password: airsloop123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ldap
+        path:
+          default: /DC=test,DC=test,DC=com?sAMAccountName?sub?memberof=CN=test,OU=Application,OU=Groups,DC=test,DC=test,DC=com
+        port:
+          ldap:
+            default: 389
+        scheme:
+          default: ldap
+      monitoring:
+        auth:
+          admin:
+            password: airsloop123
+            username: prometheus
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: prom-metrics
+          public: prometheus
+        name: prometheus
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          api:
+            default: 9090
+          http:
+            default: 80
+        scheme:
+          default: http
+      nagios:
+        auth:
+          admin:
+            password: airsloop123
+            username: nagios
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nagios-metrics
+          public: nagios
+        name: nagios
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          http:
+            default: 80
+            public: 80
+        scheme:
+          default: http
+          public: http
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      nagios:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        nagios: 3
+  wait:
+    labels:
+      release_group: airship-nagios
+    timeout: 900

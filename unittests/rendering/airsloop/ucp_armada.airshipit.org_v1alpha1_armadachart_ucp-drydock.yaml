@@ -1,0 +1,142 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-drydock
+  name: ucp-drydock
+  namespace: ucp
+spec:
+  chart_name: drydock
+  dependencies:
+  - drydock-htk
+  install:
+    no_hooks: false
+  release: drydock
+  source:
+    location: https://opendev.org/airship/drydock
+    reference: 69f2bb82fcda6daa3acd71ade573e3bcde7cf63e
+    subpath: charts/drydock
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-drydock
+        type: job
+  values:
+    conf:
+      drydock:
+        database:
+          pool_size: 200
+        maasdriver:
+          maas_api_url: http://10.22.72.21:30001/MAAS
+        plugins:
+          ingester: drydock_provisioner.ingester.plugins.deckhand.DeckhandIngester
+    endpoints:
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+          drydock:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: RegionOne
+            role: admin
+            user_domain_name: default
+            username: drydock
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: ucp
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      maas_region:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: maas-region
+          public: maas-region
+        name: maas-region
+        path:
+          default: /MAAS
+        port:
+          region_api:
+            default: 80
+            nodeport: 31900
+            podport: 80
+            public: 80
+          region_proxy:
+            default: 8000
+        scheme:
+          default: http
+      physicalprovisioner:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: drydock-api
+          public: drydock-api
+        name: drydock
+        path:
+          default: /api/v1.0
+        port:
+          api:
+            default: 9000
+            nodeport: 30000
+            public: 80
+        scheme:
+          default: http
+          public: http
+      postgresql:
+        auth:
+          admin:
+            password: airsloop123
+            username: postgres
+          user:
+            database: drydock
+            password: airsloop123
+            username: drydock
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: postgresql
+        name: postgresql
+        path: /drydock
+        port:
+          postgresql:
+            default: 5432
+        scheme: postgresql+psycopg2
+    images:
+      tags:
+        drydock: quay.io/airshipit/drydock:22a4f01cb7880828f7b955c56d53603b6170415a
+        drydock_db_sync: quay.io/airshipit/drydock:22a4f01cb7880828f7b955c56d53603b6170415a
+    labels:
+      drydock:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    network:
+      api:
+        nodeport:
+          enabled: true
+      drydock:
+        node_port:
+          port: 30000
+    replicas:
+      drydock: 1
+  wait:
+    labels:
+      release_group: airship-drydock
+    timeout: 600

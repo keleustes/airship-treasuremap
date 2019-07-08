@@ -1,0 +1,16 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-shipyard
+  name: ucp-shipyard
+  namespace: ucp
+spec:
+  values:
+    pod:
+      replicas:
+        #TODO(jeb): One of kind replica structure
+        airflow_scheduler: 1
+        airflow_worker: 1
+        shipyard_api: 1

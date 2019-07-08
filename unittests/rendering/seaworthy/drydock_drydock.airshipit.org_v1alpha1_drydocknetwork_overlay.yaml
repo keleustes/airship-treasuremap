@@ -1,0 +1,16 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: overlay
+  namespace: drydock
+spec:
+  cidr: 10.23.24.0/24
+  mtu: 9100
+  ranges:
+  - end: 10.23.24.10
+    start: 10.23.24.1
+    type: reserved
+  - end: 10.23.24.21
+    start: 10.23.24.11
+    type: static
+  vlan: "24"

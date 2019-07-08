@@ -1,0 +1,64 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: cinder
+    name: cinder-rabbitmq
+  name: cinder-rabbitmq
+  namespace: openstack
+spec:
+  chart_name: cinder-rabbitmq
+  dependencies:
+  - cinder-rabbitmq-htk
+  install:
+    no_hooks: false
+  release: cinder-rabbitmq
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.rabbitmq)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-cinder-rabbitmq
+        type: job
+  values:
+    endpoints:
+      oslo_messaging:
+        auth:
+          erlang_cookie: $(DeckhandPassphrase.osh-cinder-rabbitmq-erlang-cookie.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.cinder.oslo_messaging.admin)
+            password: $(DeckhandPassphrase.osh-cinder-oslo-messaging-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.cinder_oslo_messaging)
+      prometheus_rabbitmq_exporter: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.cinder_rabbitmq_exporter)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.rabbitmq)
+    labels:
+      prometheus_rabbitmq_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: true
+  wait:
+    labels:
+      release_group: airship-cinder-rabbitmq
+    resources:
+    - type: statefulset
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: cinder-rabbitmq-htk
+  namespace: pegleg
+spec:
+  chart_name: cinder-rabbitmq-htk
+  dependencies: []
+  release: cinder-rabbitmq-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.rabbitmq-htk)
+  values: {}

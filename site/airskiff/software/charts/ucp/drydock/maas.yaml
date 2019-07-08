@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-maas
+  namespace: ucp
+spec:
+  values:
+    conf:
+      maas:
+        images:
+          default_image: xenial
+          default_kernel: hwe-16.04
+          default_os: ubuntu

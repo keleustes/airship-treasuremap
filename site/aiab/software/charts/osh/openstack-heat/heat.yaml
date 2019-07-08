@@ -1,0 +1,9 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: heat
+  namespace: openstack
+spec:
+  test:
+    timeout: 1200

@@ -1,0 +1,62 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-postgresql
+  name: ucp-postgresql
+  namespace: ucp
+spec:
+  chart_name: ucp-postgresql
+  dependencies:
+  - postgres-htk
+  install:
+    no_hooks: false
+  release: ucp-postgresql
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 5e1ecd9840397bf9e8829ce0d98fcb721db1b74e
+    subpath: postgresql
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-ucp-postgresql
+        type: job
+  values:
+    conf:
+      postgresql:
+        max_connections: 1000
+        shared_buffers: 2GB
+    development:
+      enabled: false
+    endpoints:
+      postgresql:
+        auth:
+          admin:
+            password: password123
+            username: postgres
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: postgresql
+        name: postgresql
+        path: /DB_NAME
+        port:
+          postgresql:
+            default: 5432
+        scheme: postgresql+psycopg2
+    images:
+      tags: {}
+    labels:
+      server:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-ucp-postgresql
+    timeout: 600

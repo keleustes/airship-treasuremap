@@ -1,0 +1,31 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: nova
+  namespace: openstack
+spec:
+  values:
+    conf:
+      ceph:
+        enabled: false
+      nova:
+        libvirt:
+          virt_type: qemu
+    labels:
+      #TODO(jeb): One of a kind schema
+      agent_compute:
+        node_selector_key: openstack-compute-node
+        node_selector_value: enabled
+      agent_compute_ironic:
+        node_selector_key: openstack-compute-node
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api_metadata: 1
+        conductor: 1
+        consoleauth: 1
+        novncproxy: 1
+        osapi: 1
+        placement: 1
+        scheduler: 1

@@ -1,0 +1,78 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-deckhand
+  name: ucp-deckhand
+  namespace: ucp
+spec:
+  chart_name: ucp-deckhand
+  dependencies:
+  - deckhand-htk
+  install:
+    no_hooks: false
+  release: ucp-deckhand
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.deckhand)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-deckhand
+        type: job
+  values:
+    conf:
+      deckhand:
+        DEFAULT:
+          debug: true
+          use_stderr: true
+          use_syslog: true
+        keystone_authtoken:
+          memcache_security_strategy: None
+    endpoints:
+      deckhand: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.deckhand)
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.keystone.admin)
+            password: $(DeckhandPassphrase.ucp-keystone-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.deckhand.keystone)
+            password: $(DeckhandPassphrase.ucp-deckhand-keystone-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.identity)
+      key_manager: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.key_manager)
+      oslo_cache: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.oslo_cache)
+      postgresql:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.postgres.admin)
+            password: $(DeckhandPassphrase.ucp-postgres-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.deckhand.postgres)
+            password: $(DeckhandPassphrase.ucp-deckhand-postgres-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.postgresql)
+        path: /$(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.deckhand.postgres.database)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.deckhand)
+    pod:
+      replicas:
+        deckhand: 2
+  wait:
+    labels:
+      release_group: airship-ucp-deckhand
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: deckhand-htk
+  namespace: pegleg
+spec:
+  chart_name: deckhand-htk
+  dependencies: []
+  release: deckhand-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.deckhand-htk)
+  values: {}

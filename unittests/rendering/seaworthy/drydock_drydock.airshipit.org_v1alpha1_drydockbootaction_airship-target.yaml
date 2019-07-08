@@ -1,0 +1,20 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockBootAction
+metadata:
+  name: airship-target
+  namespace: drydock
+spec:
+  assets:
+  - data: |
+      [Unit]
+      Description=Airshipt bootaction target
+      After=multi-user.target cloud-init.target
+
+      [Install]
+      WantedBy=graphical.target
+    data_pipeline:
+    - utf8_decode
+    path: /etc/systemd/system/airship.target
+    permissions: "444"
+    type: unit
+  signaling: false

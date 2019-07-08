@@ -1,0 +1,6 @@
+apiVersion: deckhand.airshipit.org/v1alpha1
+kind: DeckhandPassphrase
+metadata:
+  name: osh-infra-rgw-s3-admin-access-key
+  namespace: pegleg
+spec: admin_access_key

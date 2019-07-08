@@ -1,0 +1,62 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: tempest
+    name: tempest
+  name: tempest
+  namespace: openstack
+spec:
+  chart_name: tempest
+  dependencies:
+  - tempest-htk
+  install:
+    no_hooks: false
+  release: tempest
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.tempest)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-tempest
+        type: job
+  values:
+    ceph_client:
+      configmap: tenant-ceph-etc
+      user_secret_name: pvc-tceph-client-key
+    endpoints:
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.admin)
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+          tempest:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.tempest.tempest)
+            password: $(DeckhandPassphrase.osh-tempest-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.tempest)
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-tempest
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: tempest-htk
+  namespace: pegleg
+spec:
+  chart_name: tempest-htk
+  dependencies: []
+  release: tempest-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.tempest-htk)
+  values: {}

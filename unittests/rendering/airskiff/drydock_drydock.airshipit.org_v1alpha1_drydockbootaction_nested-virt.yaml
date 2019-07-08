@@ -1,0 +1,18 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockBootAction
+metadata:
+  labels:
+    application: drydock
+    name: nested-virt
+  name: nested-virt
+  namespace: drydock
+spec:
+  assets:
+  - data: |
+      options kvm-intel nested=y
+    data_pipeline:
+    - utf8_decode
+    path: /etc/modprobe.d/nested-virt.conf
+    permissions: "644"
+    type: file
+  signaling: false

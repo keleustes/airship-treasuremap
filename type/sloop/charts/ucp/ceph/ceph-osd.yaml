@@ -1,0 +1,9 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-osd
+  name: ucp-ceph-osd
+  namespace: ceph
+spec: {}

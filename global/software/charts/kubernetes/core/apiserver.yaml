@@ -1,0 +1,71 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-apiserver
+  name: kubernetes-apiserver
+  namespace: kube-system
+spec:
+  chart_name: apiserver
+  dependencies:
+  - kubernetes-apiserver-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-apiserver
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.apiserver)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-apiserver
+        type: job
+  values:
+    apiserver:
+      etcd:
+        endpoints: https://127.0.0.1:2378
+      tls:
+        tls-cipher-suites: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA
+        tls-min-version: VersionTLS12
+    command_prefix:
+    - /apiserver
+    - --service-cluster-ip-range=$(PeglegCommonAddresses.common-addresses.spec.kubernetes.service_cidr)
+    - --service-node-port-range=$(PeglegCommonAddresses.common-addresses.spec.kubernetes.service_node_port_range)
+    - --authorization-mode=Node,RBAC
+    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds
+    - --endpoint-reconciler-type=lease
+    - --feature-gates=PodShareProcessNamespace=true
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.apiserver)
+    network:
+      kubernetes_service_ip: $(PeglegCommonAddresses.common-addresses.spec.kubernetes.api_service_ip)
+      pod_cidr: $(PeglegCommonAddresses.common-addresses.spec.kubernetes.pod_cidr)
+    secrets:
+      etcd:
+        tls:
+          ca: $(DeckhandCertificateAuthority.kubernetes-etcd.spec)
+          cert: $(DeckhandCertificate.apiserver-etcd.spec)
+          key: $(DeckhandCertificateKey.apiserver-etcd.spec)
+      service_account:
+        public_key: $(DeckhandPublicKey.service-account.spec)
+      tls:
+        ca: $(DeckhandCertificateAuthority.kubernetes.spec)
+        cert: $(DeckhandCertificate.apiserver.spec)
+        key: $(DeckhandCertificateKey.apiserver.spec)
+  wait:
+    labels:
+      release_group: airship-kubernetes-apiserver
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kubernetes-apiserver-htk
+  namespace: pegleg
+spec:
+  chart_name: kubernetes-apiserver-htk
+  dependencies: []
+  release: kubernetes-apiserver-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.apiserver-htk)
+  values: {}

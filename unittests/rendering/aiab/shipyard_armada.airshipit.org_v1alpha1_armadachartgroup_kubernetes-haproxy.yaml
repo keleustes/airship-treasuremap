@@ -1,0 +1,9 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: kubernetes-haproxy
+  namespace: shipyard
+spec:
+  chart_group:
+  - haproxy
+  description: HAProxy for Kubernetes

@@ -1,0 +1,15 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: horizon-htk
+  namespace: pegleg
+spec:
+  chart_name: horizon-htk
+  dependencies: []
+  release: horizon-htk
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 1f1482bcb71cd3483c6df3ac4bab09653ed6a2e1
+    subpath: helm-toolkit
+    type: git
+  values: {}

@@ -1,0 +1,52 @@
+{
+  "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.DrydockNetwork": {
+    "Schema": {
+      "description": "DrydockNetwork",
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object.  Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values.  More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents.  Servers may infer this from the endpoint the client submits requests to. Cannot be updated.  In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.DrydockNetworkSpec"
+        },
+        "status": {
+          "$ref": "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.DrydockNetworkStatus"
+        }
+      }
+    },
+    "Dependencies": [
+      "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.DrydockNetworkSpec",
+      "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.DrydockNetworkStatus",
+      "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"
+    ]
+  },
+  "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.DrydockNetworkSpec": {
+    "Schema": {
+      "description": "DrydockNetworkSpec defines the desired state of DrydockNetwork",
+      "properties": {
+        "beeRef": {
+          "x-kubernetes-object-ref-api-version": "v1beta1",
+          "x-kubernetes-object-ref-kind": "Bee",
+          "$ref": "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.Bee"
+        }
+      }
+    },
+    "Dependencies": [
+      "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.Bee"
+    ]
+  },
+  "github.com//keleustes/airship-treasuremap/pkg/apis/drydock/v1alpha1.DrydockNetworkStatus": {
+    "Schema": {
+      "description": "DrydockNetworkStatus defines the observed state of DrydockNetwork"
+    },
+    "Dependencies": []
+  }
+}

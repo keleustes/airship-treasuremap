@@ -1,0 +1,7 @@
+apiVersion: pegleg.airshipit.org/v1alpha1
+kind: PeglegSiteDefinition
+metadata:
+  name: airsloop
+  namespace: pegleg
+spec:
+  site_type: sloop

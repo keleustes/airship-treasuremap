@@ -1,0 +1,19 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: glance
+  namespace: openstack
+spec:
+  test:
+    enabled: false
+  values:
+    bootstrap:
+      enabled: false
+    pod:
+      replicas:
+        api: 1
+        registry: 1
+    storage:
+      #TODO(jeb) schema wants on object
+      todojeb: pvc

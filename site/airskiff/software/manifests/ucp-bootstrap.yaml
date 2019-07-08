@@ -1,0 +1,15 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaManifest
+metadata:
+  name: ucp-bootstrap
+  namespace: shipyard
+spec:
+  chart_groups:
+  - osh-infra-nfs-provisioner
+  - ucp-core
+  - ucp-keystone
+  - ucp-shipyard
+  - ucp-armada
+  - ucp-deckhand
+  release_prefix: airship

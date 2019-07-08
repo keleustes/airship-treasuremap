@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: glance
+  name: glance
+  namespace: openstack
+spec:
+  values:
+    pod:
+      replicas:
+        api: 1
+        registry: 1

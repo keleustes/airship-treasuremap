@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  labels:
+    component: tempest
+    name: openstack-tempest-chart-group
+  name: openstack-tempest
+  namespace: shipyard
+spec:
+  chart_group:
+  - tempest
+  description: Deploy Tempest

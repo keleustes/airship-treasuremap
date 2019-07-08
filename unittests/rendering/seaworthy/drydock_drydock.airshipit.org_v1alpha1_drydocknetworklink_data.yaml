@@ -1,0 +1,22 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetworkLink
+metadata:
+  name: data
+  namespace: drydock
+spec:
+  allowed_networks:
+  - oam
+  - storage
+  - overlay
+  - calico
+  bonding:
+    down_delay: 3000
+    hash: layer3+4
+    mode: 802.3ad
+    mon_rate: 100
+    peer_rate: fast
+    up_delay: 1000
+  linkspeed: auto
+  mtu: 9100
+  trunking:
+    mode: 802.1q

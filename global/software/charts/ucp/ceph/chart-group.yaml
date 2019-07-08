@@ -1,0 +1,15 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: ucp-ceph
+  namespace: shipyard
+spec:
+  chart_group:
+  - ucp-ceph-ingress
+  - ucp-ceph-mon
+  - ucp-ceph-osd
+  - ucp-ceph-client
+  - ucp-ceph-provisioners
+  description: Ceph Storage
+  sequenced: true

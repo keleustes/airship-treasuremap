@@ -1,0 +1,6 @@
+apiVersion: deckhand.airshipit.org/v1alpha1
+kind: DeckhandPassphrase
+metadata:
+  name: private-docker-key
+  namespace: pegleg
+spec: cGFzc3dvcmQxMjM=

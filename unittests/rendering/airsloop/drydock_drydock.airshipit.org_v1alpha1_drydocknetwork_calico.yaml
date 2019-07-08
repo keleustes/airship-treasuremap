@@ -1,0 +1,16 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: calico
+  namespace: drydock
+spec:
+  cidr: 10.22.72.0/24
+  mtu: 1500
+  ranges:
+  - end: 10.22.72.10
+    start: 10.22.72.1
+    type: reserved
+  - end: 10.22.72.31
+    start: 10.22.72.21
+    type: static
+  vlan: "72"

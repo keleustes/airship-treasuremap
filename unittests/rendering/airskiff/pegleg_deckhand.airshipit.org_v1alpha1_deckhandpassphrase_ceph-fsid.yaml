@@ -1,0 +1,6 @@
+apiVersion: deckhand.airshipit.org/v1alpha1
+kind: DeckhandPassphrase
+metadata:
+  name: ceph-fsid
+  namespace: pegleg
+spec: 7b7576f4-3358-4668-9112-100440079807

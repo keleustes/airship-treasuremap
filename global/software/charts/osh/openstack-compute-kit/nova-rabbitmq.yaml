@@ -1,0 +1,64 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: nova
+    name: nova-rabbitmq
+  name: nova-rabbitmq
+  namespace: openstack
+spec:
+  chart_name: nova-rabbitmq
+  dependencies:
+  - nova-rabbitmq-htk
+  install:
+    no_hooks: false
+  release: nova-rabbitmq
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.rabbitmq)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-nova-rabbitmq
+        type: job
+  values:
+    endpoints:
+      oslo_messaging:
+        auth:
+          erlang_cookie: $(DeckhandPassphrase.osh-nova-rabbitmq-erlang-cookie.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_messaging.admin)
+            password: $(DeckhandPassphrase.osh-nova-oslo-messaging-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.nova_oslo_messaging)
+      prometheus_rabbitmq_exporter: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.nova_rabbitmq_exporter)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.rabbitmq)
+    labels:
+      prometheus_rabbitmq_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: true
+  wait:
+    labels:
+      release_group: airship-nova-rabbitmq
+    resources:
+    - type: statefulset
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: nova-rabbitmq-htk
+  namespace: pegleg
+spec:
+  chart_name: nova-rabbitmq-htk
+  dependencies: []
+  release: nova-rabbitmq-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.rabbitmq-htk)
+  values: {}

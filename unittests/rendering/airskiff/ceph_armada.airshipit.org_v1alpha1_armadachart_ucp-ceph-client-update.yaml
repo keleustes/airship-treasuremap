@@ -1,0 +1,81 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-client-update
+  name: ucp-ceph-client-update
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-client
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: ucp-ceph-client
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-client
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-ceph-client
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: 7b7576f4-3358-4668-9112-100440079807
+          osd_pool_default_size: 1
+      pool:
+        crush:
+          tunables: hammer
+        default:
+          crush_rule: replicated_rule
+        target:
+          osd: 24
+          pg_per_osd: 100
+          protected: true
+    deployment:
+      ceph: true
+    endpoints:
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: ceph
+        port:
+          mon:
+            default: 6789
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      mds:
+        node_selector_key: ceph-mds
+        node_selector_value: enabled
+      mgr:
+        node_selector_key: ceph-mgr
+        node_selector_value: enabled
+    network:
+      cluster: 10.23.23.0/24
+      public: 10.23.23.0/24
+    pod:
+      replicas:
+        mds: 2
+        mgr: 2
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-client
+    timeout: 900

@@ -1,0 +1,87 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: osh-infra-radosgw
+  namespace: osh-infra
+spec:
+  chart_name: osh-infra-radosgw
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: osh-infra-radosgw
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-rgw
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-osh-infra-radosgw
+        type: job
+  values:
+    bootstrap:
+      enabled: false
+    ceph_client:
+      configmap: ceph-etc
+    conf:
+      rgw_s3:
+        enabled: true
+    deployment:
+      ceph: true
+      cephfs_provisioner: false
+      client_secrets: false
+      rbd_provisioner: false
+      rgw_keystone_user_and_endpoints: false
+      storage_secrets: false
+    endpoints:
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: ceph
+        port:
+          mon:
+            default: 6789
+      ceph_object_store:
+        auth:
+          admin:
+            access_key: admin_access_key
+            secret_key: admin_secret_key
+            username: s3_admin
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-rgw
+          public: radosgw
+        name: radosgw
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          api:
+            default: 8088
+            public: 80
+        scheme:
+          default: http
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      rgw:
+        node_selector_key: ceph-rgw
+        node_selector_value: enabled
+    network:
+      cluster: 10.23.23.0/24
+      public: 10.23.23.0/24
+  wait:
+    labels:
+      release_group: airship-osh-infra-radosgw
+    timeout: 900

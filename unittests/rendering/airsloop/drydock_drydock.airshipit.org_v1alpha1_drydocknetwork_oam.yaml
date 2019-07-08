@@ -1,0 +1,23 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: oam
+  namespace: drydock
+spec:
+  cidr: 10.22.71.0/24
+  dns:
+    domain: atlantafoundry.com
+    servers: 8.8.8.8,8.8.4.4
+  mtu: 1500
+  ranges:
+  - end: 10.22.71.10
+    start: 10.22.71.1
+    type: reserved
+  - end: 10.22.71.31
+    start: 10.22.71.21
+    type: static
+  routes:
+  - gateway: 10.22.71.1
+    metric: 100
+    subnet: 0.0.0.0/0
+  vlan: "71"

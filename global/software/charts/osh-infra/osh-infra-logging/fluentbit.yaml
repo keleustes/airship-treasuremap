@@ -1,0 +1,230 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    hosttype: fluentbit
+  name: fluentbit
+  namespace: osh-infra
+spec:
+  chart_name: fluentbit
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: fluentbit
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh_infra.fluentbit)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-fluentbit
+        type: job
+  values:
+    conf:
+      fluentbit:
+        template: |
+          [SERVICE]
+              Daemon false
+              Flush 5
+              Log_Level info
+              Parsers_File parsers.conf
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name tail
+              Path /var/log/kern.log
+              Tag kernel
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name tail
+              Parser docker
+              Path /var/log/containers/*.log
+              Tag kube.*
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name tail
+              Path /var/log/libvirt/libvirtd.log
+              Tag libvirt
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name tail
+              Path /var/log/libvirt/qemu/*.log
+              Tag qemu
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name systemd
+              Path ${JOURNAL_PATH}
+              Systemd_Filter _SYSTEMD_UNIT=kubelet.service
+              Tag journal.*
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name systemd
+              Path ${JOURNAL_PATH}
+              Systemd_Filter _SYSTEMD_UNIT=docker.service
+              Tag journal.*
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name tail
+              Parsers syslog
+              Path /var/log/ceph/airship-ucp-ceph-mon/ceph.log
+              Tag ceph.cluster.*
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name tail
+              Parsers syslog
+              Path /var/log/ceph/airship-ucp-ceph-mon/ceph.audit.log
+              Tag ceph.audit.*
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name tail
+              Parsers syslog
+              Path /var/log/ceph/airship-ucp-ceph-mon/ceph-mon**.log
+              Tag ceph.mon.*
+
+          [INPUT]
+              Buffer_Chunk_Size 1M
+              Buffer_Max_Size 1M
+              Mem_Buf_Limit 5MB
+              Name tail
+              Parsers syslog
+              Path /var/log/ceph/airship-ucp-ceph-osd/ceph-osd**.log
+              Tag ceph.osd.*
+
+          [FILTER]
+              Interval 1s
+              Match **
+              Name throttle
+              Rate 1000
+              Window 300
+
+          [FILTER]
+              Match libvirt
+              Name record_modifier
+              Record hostname ${HOSTNAME}
+
+          [FILTER]
+              Match qemu
+              Name record_modifier
+              Record hostname ${HOSTNAME}
+
+          [FILTER]
+              Match kernel
+              Name record_modifier
+              Record hostname ${HOSTNAME}
+
+          [FILTER]
+              Match journal.**
+              Name modify
+              Rename _BOOT_ID BOOT_ID
+              Rename _CAP_EFFECTIVE CAP_EFFECTIVE
+              Rename _CMDLINE CMDLINE
+              Rename _COMM COMM
+              Rename _EXE EXE
+              Rename _GID GID
+              Rename _HOSTNAME HOSTNAME
+              Rename _MACHINE_ID MACHINE_ID
+              Rename _PID PID
+              Rename _SYSTEMD_CGROUP SYSTEMD_CGROUP
+              Rename _SYSTEMD_SLICE SYSTEMD_SLICE
+              Rename _SYSTEMD_UNIT SYSTEMD_UNIT
+              Rename _TRANSPORT TRANSPORT
+              Rename _UID UID
+
+          [OUTPUT]
+              Match **.fluentd**
+              Name null
+
+          [FILTER]
+              Match kube.*
+              Merge_JSON_Log true
+              Name kubernetes
+
+          [OUTPUT]
+              Host ${FLUENTD_HOST}
+              Match *
+              Name forward
+              Port ${FLUENTD_PORT}
+      parsers:
+        template: |
+          [PARSER]
+            Name syslog
+            Format regex
+            Regex '^(?<time>.*[0-9]{2}:[0-9]{2}:[0-9]{2}) (?<host>[^ ]*) (?<app>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? (?<log>.+)$'
+            Time_Key time
+            Time_Format "%Y-%m-%dT%H:%M:%S.%L"
+            Time_Keep On
+            Types "pid:integer"
+    endpoints:
+      fluentbit: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.fluentd)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh_infra.fluentbit)
+    labels:
+      fluentbit:
+        node_selector_key: fluentbit
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: true
+    pod:
+      resources:
+        #TODO(jeb) enabled: true
+        fluentbit:
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+        jobs:
+          image_repo_sync:
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
+            requests:
+              cpu: '0'
+              memory: '0'
+          tests:
+            limits:
+              cpu: 2000m
+              memory: 1024Mi
+            requests:
+              cpu: '0'
+              memory: '0'
+  wait:
+    labels:
+      release_group: airship-fluentbit
+    timeout: 900

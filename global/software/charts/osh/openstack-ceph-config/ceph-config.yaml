@@ -1,0 +1,56 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: ceph
+    name: openstack-ceph-config
+  name: openstack-ceph-config
+  namespace: openstack
+spec:
+  chart_name: openstack-ceph-config
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  release: openstack-ceph-config
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.ceph-provisioners)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-openstack-ceph-config
+        type: job
+  values:
+    bootstrap:
+      enabled: false
+    deployment:
+      ceph: false
+      cephfs_provisioner: false
+      client_secrets: true
+      rbd_provisioner: false
+      rgw_keystone_user_and_endpoints: false
+    endpoints:
+      ceph_mon: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.ceph_mon)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ceph.ceph-provisioners)
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      provisioner:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    network:
+      cluster: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.cluster_cidr)
+      public: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.public_cidr)
+    storageclass:
+      rbd:
+        ceph_configmap_name: ceph-etc
+        parameters:
+          userSecretName: pvc-ceph-client-key
+  wait:
+    labels:
+      release_group: airship-openstack-ceph-config
+    timeout: 900

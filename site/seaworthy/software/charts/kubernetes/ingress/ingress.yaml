@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ingress-kube-system
+  namespace: kube-system
+spec:
+  values:
+    network:
+      ingress:
+        disable-ipv6: 'true'
+      vip:
+        addr: $(PeglegCommonAddresses.common-addresses.spec.vip.ingress_vip)
+        manage: true

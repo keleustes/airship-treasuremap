@@ -1,0 +1,48 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-keystone-memcached
+  name: ucp-keystone-memcached
+  namespace: ucp
+spec:
+  chart_name: ucp-keystone-memcached
+  dependencies:
+  - ucp-memcached-htk
+  install:
+    no_hooks: false
+  release: ucp-keystone-memcached
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.memcached)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-keystone-memcached
+        type: job
+  values:
+    endpoints:
+      oslo_cache: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.oslo_cache)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.memcached)
+    labels:
+      server:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-ucp-keystone-memcached
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-memcached-htk
+  namespace: pegleg
+spec:
+  chart_name: ucp-memcached-htk
+  dependencies: []
+  release: ucp-memcached-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.memcached-htk)
+  values: {}

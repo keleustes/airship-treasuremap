@@ -1,0 +1,11 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: glance
+  namespace: openstack
+spec:
+  values:
+    storage:
+      #TODO(jeb) schema wants on object
+      todojeb: pvc

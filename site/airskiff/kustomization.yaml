@@ -1,0 +1,70 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+patchesStrategicMerge:
+- ./profiles/genesis.yaml
+- ./software/charts/kubernetes/container-networking/etcd.yaml
+- ./software/charts/kubernetes/etcd/etcd.yaml
+- ./software/charts/kubernetes/ingress/ingress.yaml
+- ./software/charts/osh-infra/osh-infra-logging/elasticsearch.yaml
+- ./software/charts/osh-infra/osh-infra-logging/fluentbit.yaml
+- ./software/charts/osh-infra/osh-infra-logging/fluentd.yaml
+- ./software/charts/osh/openstack-compute-kit/chart-group.yaml
+- ./software/charts/osh/openstack-compute-kit/libvirt.yaml
+- ./software/charts/osh/openstack-compute-kit/neutron-rabbitmq.yaml
+- ./software/charts/osh/openstack-compute-kit/neutron.yaml
+- ./software/charts/osh/openstack-compute-kit/nova-rabbitmq.yaml
+- ./software/charts/osh/openstack-compute-kit/nova.yaml
+- ./software/charts/osh/openstack-glance/chart-group.yaml
+- ./software/charts/osh/openstack-glance/glance.yaml
+- ./software/charts/osh/openstack-glance/rabbitmq.yaml
+- ./software/charts/osh/openstack-heat/chart-group.yaml
+- ./software/charts/osh/openstack-heat/rabbitmq.yaml
+- ./software/charts/osh/openstack-ingress-controller/chart-group.yaml
+- ./software/charts/osh/openstack-ingress-controller/ingress.yaml
+- ./software/charts/osh/openstack-keystone/chart-group.yaml
+- ./software/charts/osh/openstack-keystone/keystone.yaml
+- ./software/charts/osh/openstack-keystone/rabbitmq.yaml
+- ./software/charts/osh/openstack-mariadb/chart-group.yaml
+- ./software/charts/osh/openstack-mariadb/mariadb.yaml
+- ./software/charts/ucp/armada/armada.yaml
+- ./software/charts/ucp/armada/chart-group.yaml
+- ./software/charts/ucp/ceph/ceph-client-update.yaml
+- ./software/charts/ucp/ceph/ceph-client.yaml
+- ./software/charts/ucp/ceph/ceph-osd.yaml
+- ./software/charts/ucp/core/ingress.yaml
+- ./software/charts/ucp/core/mariadb.yaml
+- ./software/charts/ucp/core/rabbitmq.yaml
+- ./software/charts/ucp/deckhand/barbican.yaml
+- ./software/charts/ucp/deckhand/deckhand.yaml
+- ./software/charts/ucp/divingbell/divingbell.yaml
+- ./software/charts/ucp/drydock/maas.yaml
+- ./software/charts/ucp/keystone/keystone.yaml
+- ./software/charts/ucp/promenade/promenade.yaml
+- ./software/charts/ucp/shipyard/shipyard.yaml
+- ./software/manifests/full-site.yaml
+
+resources:
+- ../../type/foundry
+
+- ./site-definition.yaml
+- ./profiles/hardware/dell_r720.yaml
+- ./profiles/host/cp_r720.yaml
+- ./profiles/host/dp_r720.yaml
+- ./profiles/region.yaml
+- ./baremetal/bootactions/promjoin.yaml
+- ./baremetal/nodes.yaml
+- ./deployment/deployment-configuration.yaml
+- ./networks/common-addresses.yaml
+- ./networks/physical/networks.yaml
+- ./secrets/passphrases/ceph_fsid.yaml
+- ./secrets/certificates/certificates.yaml
+- ./secrets/certificates/ingress.yaml
+- ./secrets/passphrases
+- ./software/config/common-software-config.yaml
+- ./software/config/endpoints.yaml
+- ./software/config/service_accounts.yaml
+- ./software/manifests/ucp-bootstrap.yaml
+
+vars:

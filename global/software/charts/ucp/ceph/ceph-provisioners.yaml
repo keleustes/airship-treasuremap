@@ -1,0 +1,65 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-provisioners
+  name: ucp-ceph-provisioners
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-provisioners
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: ucp-ceph-provisioners
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.ceph-provisioners)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-ceph-provisioners
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: $(DeckhandPassphrase.ceph-fsid.spec)
+          osd_mkfs_type: xfs
+    deployment:
+      ceph: true
+      cephfs_provisioner: true
+      client_secrets: false
+      rbd_provisioner: true
+    endpoints:
+      ceph_mon: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.ceph_mon)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ceph.ceph-provisioners)
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      provisioner:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    network:
+      cluster: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.cluster_cidr)
+      public: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.public_cidr)
+    pod:
+      replicas:
+        cephfs_provisioner: 2
+        rbd_provisioner: 2
+    storageclass:
+      rbd:
+        ceph_configmap_name: ceph-client-keys-etc
+        parameters:
+          userSecretName: pvc-ceph-client-key
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-provisioners
+    timeout: 900

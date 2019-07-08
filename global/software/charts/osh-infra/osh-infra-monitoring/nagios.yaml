@@ -1,0 +1,85 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: nagios
+  namespace: osh-infra
+spec:
+  chart_name: nagios
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: nagios
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh_infra.nagios)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-nagios
+        type: job
+  values:
+    conf:
+      apache:
+        host: |
+          <VirtualHost *:80>
+            <Location />
+                ProxyPass http://localhost:{{ tuple "nagios" "internal" "nagios" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}/
+                ProxyPassReverse http://localhost:{{ tuple "nagios" "internal" "nagios" . | include "helm-toolkit.endpoints.endpoint_port_lookup" }}/
+            </Location>
+            <Proxy *>
+                AuthName "Nagios"
+                AuthType Basic
+                AuthBasicProvider file ldap
+                AuthUserFile /usr/local/apache2/conf/.htpasswd
+                AuthLDAPBindDN {{ .Values.endpoints.ldap.auth.admin.bind }}
+                AuthLDAPBindPassword {{ .Values.endpoints.ldap.auth.admin.password }}
+                AuthLDAPURL {{ tuple "ldap" "public" "ldap" . | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+                Require valid-user
+            </Proxy>
+          </VirtualHost>
+    endpoints:
+      elasticsearch:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.elasticsearch.admin)
+            password: $(DeckhandPassphrase.osh-infra-elasticsearch-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.elasticsearch)
+      ldap:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.ldap.admin)
+            password: $(DeckhandPassphrase.osh-keystone-ldap-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.ldap)
+      monitoring:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.prometheus.admin)
+            password: $(DeckhandPassphrase.osh-infra-prometheus-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.monitoring)
+      nagios:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-infra-service-accounts.spec.osh_infra.nagios.admin)
+            password: $(DeckhandPassphrase.osh-infra-nagios-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.nagios)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh_infra.nagios)
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      nagios:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        nagios: 3
+  wait:
+    labels:
+      release_group: airship-nagios
+    timeout: 900

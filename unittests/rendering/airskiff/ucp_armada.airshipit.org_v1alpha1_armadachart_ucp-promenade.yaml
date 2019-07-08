@@ -1,0 +1,94 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-promenade
+  name: ucp-promenade
+  namespace: ucp
+spec:
+  chart_name: promenade
+  dependencies:
+  - promenade-htk
+  install:
+    no_hooks: false
+  release: ucp-promenade
+  source:
+    location: https://opendev.org/airship/promenade
+    reference: fefd664cd8a5de659e197694b1cfa4d243ab4fae
+    subpath: charts/promenade
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-promenade
+        type: job
+  values:
+    conf:
+      paste:
+        filter:authtoken:
+          admin_tenant_name: service
+          admin_user: promenade
+          delay_auth_decision: true
+          identity_uri: http://keystone-api.ucp.svc.cluster.local/
+          paste.filter_factory: keystonemiddleware.auth_token:filter_factory
+          service_token_roles_required: true
+    endpoints:
+      identity:
+        auth:
+          admin:
+            password: password123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+          user:
+            password: password123
+            project_domain_name: default
+            project_name: service
+            region_name: RegionOne
+            role: admin
+            user_domain_name: default
+            username: promenade
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: ucp
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      kubernetesprovisioner:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: promenade-api
+        name: promenade
+        path:
+          default: /api/v1.0
+        port:
+          api:
+            default: 80
+        scheme:
+          default: http
+    images:
+      tags:
+        monitoring_image: busybox:1.28.3
+        promenade: quay.io/airshipit/promenade:fefd664cd8a5de659e197694b1cfa4d243ab4fae
+    pod:
+      env:
+        promenade_api: []
+      mount_path: /opt/kubernetes/bin/hyperkube
+      replicas:
+        api: 2
+  wait:
+    labels:
+      release_group: airship-ucp-promenade
+    timeout: 600

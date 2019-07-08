@@ -1,0 +1,10 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: osh-infra-ceph-config
+  namespace: shipyard
+spec:
+  chart_group:
+  - osh-infra-ceph-config
+  description: Ceph config for OpenStack-Infra namespace(s)

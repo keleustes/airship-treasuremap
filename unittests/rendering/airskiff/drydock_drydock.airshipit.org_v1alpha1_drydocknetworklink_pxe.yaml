@@ -1,0 +1,15 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetworkLink
+metadata:
+  name: pxe
+  namespace: drydock
+spec:
+  allowed_networks:
+  - pxe
+  bonding:
+    mode: disabled
+  linkspeed: auto
+  mtu: 1500
+  trunking:
+    default_network: pxe
+    mode: disabled

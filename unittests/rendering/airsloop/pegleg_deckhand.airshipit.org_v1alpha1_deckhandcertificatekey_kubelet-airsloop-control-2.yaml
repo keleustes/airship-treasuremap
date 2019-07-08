@@ -1,0 +1,33 @@
+apiVersion: deckhand.airshipit.org/v1alpha1
+kind: DeckhandCertificateKey
+metadata:
+  name: kubelet-airsloop-control-2
+  namespace: pegleg
+spec: |
+  -----BEGIN RSA PRIVATE KEY-----
+  MIIEpAIBAAKCAQEAtA7y0pt1s58brEmKVtzMtsLX9GhUUh6DmD+v+8LZuECCapk3
+  oY9SGa73qSVwiPcSODsiZe+h8b+RaHHGTJ9yEC1fy0upJbqwvi0iYsA+UbCFioAM
+  klmHFnPAcmKqhV6DrK02p6XjWVebEkTQphskGCwFMyEgjrY9Z+tJmZAnD/VD3zeU
+  fdrBAKlVa6cshMCXG6ElmuUOgfOGrWKEkDrc/DTDemk/eNHyjbZ4wKMJtiUVVk5n
+  xFlcd1Z5hBVuw723b/hWPvSy5YpJvH+V18b0sVuV5D53Wr3lDBosHPPutt65eXBC
+  53/xouWyO85PrQ1itCXbUeDcHNIgityMcifyFQIDAQABAoIBAC6aF9rOhZ4htgXX
+  Wsi0iP9cWoxVXE2MvD5xbVjZy4PWnmp8kVttPrCLCmpq2D96wupu065SYTWygS3p
+  FIvMULdDJyH0ySiMsyXlhJrOatK1vzpjfd168m2rM8nnI381QRs2EYk+dCMxe181
+  FFOJfsQK0KW1EzocjLQSv4/RMWr9fpq+eyDezOYKqh3Jk97lp6EdvufV1eu3haPL
+  DH9FrKfGfP4PfVyuxaAtiAxciWWehqZC8fA3C2+giYvKjL8aRFS1E6JckoY4f5WN
+  DFGFblO2ZB0GxXjDB4al/XNBs+dvi+/eGiAOYvdw1DOUxBkFY6OrBX6dgFhIgRij
+  P36biYECgYEA1kYy1kIyWZNZtepLMY4TecCymBb/rC1kygg4abSeUVACBGcXbaMO
+  UunjGd7WPhOe8OmZlltsIckQmFqG4kJl+UYsURahEEmtgVpgp4pakAeOhMR8/nDs
+  uNGVjwL7+flHFzq2BRCjYuILiTsXdCNZMkSi1BP9kX2JBN2S/Fsw27ECgYEA1x8N
+  5CAKHeIiUBTZMYA8qsqBZy+6jhsAwXwxYAmM+J56F6kXRO2jeMcBCYzhYqYOi3b5
+  sosNHCdJF3XdBaS0VEJYrXptVuw632nt4cwVfheSz+7XrlkaIDhC7esal0zraC19
+  wC0fdm0+FAxSKjQbSqaHgiF/skBAAGcKmD3rKaUCgYEA1Rm3kXMAVCnBfLRo1/3u
+  zJWiiLPGztvOc0c9o5MoKMIjX3GP0U/q/PbzD1WZSN+GoR4Ry4FcxzUKNhtCLl/O
+  vtzVUkfpIyPDVPQnUDi+3KNHUC+CCCMSqrR1w2c6Zl9OHoIbaGoltEAPLQoBx1Uo
+  bl/oeHbxJfLthFNAzY17x+ECgYEAre4R0SyGgXrgu1bf9MH2SzDIR6GzeEok5kt/
+  sGKIdEvN82tnwPdSgMiF8i7R3GzevaxIXy9GPkkVM768IV/13Vp3UGv4E5uUTibb
+  iwDzL6vnq+80u2aXVQ2oL60zJrmua+C8F7FkCuBwnM0Jcc4HcugKEBD9qiWAmdK2
+  IjmN9XECgYAY/NpIYXhn29+fIzFotBXb3XDb4EFTKe+F+k49gnjnHcbcXFqNm2iv
+  thwzaN5qXkBpNTTFIuFS3WpQDCP+JIuwroEa1ldR/yAmJavdJ8C1oyrPmxuVOvwc
+  eQmNK/CvDNsRVzhdJHxZ0py8pIyni4Of5pXqyw0jeJniaQjYtXkpeA==
+  -----END RSA PRIVATE KEY-----

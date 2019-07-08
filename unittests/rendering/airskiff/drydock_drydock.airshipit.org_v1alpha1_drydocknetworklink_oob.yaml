@@ -1,0 +1,17 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetworkLink
+metadata:
+  name: oob
+  namespace: drydock
+spec:
+  allowed_networks:
+  - oob
+  bonding:
+    mode: disabled
+  labels:
+    noconfig: enabled
+  linkspeed: auto
+  mtu: 1500
+  trunking:
+    default_network: oob
+    mode: disabled

@@ -1,0 +1,17 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetworkLink
+metadata:
+  name: data
+  namespace: drydock
+spec:
+  allowed_networks:
+  - oam
+  - storage
+  - overlay
+  - calico
+  bonding:
+    mode: disabled
+  linkspeed: auto
+  mtu: 1500
+  trunking:
+    mode: 802.1q

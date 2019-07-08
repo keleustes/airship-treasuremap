@@ -1,0 +1,24 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockBaremetalNode
+metadata:
+  name: airsloop-compute-1
+  namespace: drydock
+spec:
+  addressing:
+  - address: 10.22.104.22
+    network: oob
+  - address: 10.22.70.22
+    network: pxe
+  - address: 10.22.71.22
+    network: oam
+  - address: 10.22.72.22
+    network: calico
+  - address: 10.22.73.22
+    network: storage
+  - address: 10.22.74.22
+    network: overlay
+  host_profile: compute_r720xd
+  metadata:
+    rack: cab22
+    tags:
+    - workers

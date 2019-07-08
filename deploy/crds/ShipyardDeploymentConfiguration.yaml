@@ -1,0 +1,113 @@
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: shipyarddeploymentconfigurations.shipyard.airshipit.org
+  labels:
+    application: shipyard
+spec:
+  additionalPrinterColumns:
+  group: shipyard.airshipit.org
+  version: v1alpha1
+  names:
+    kind: ShipyardDeploymentConfiguration
+    plural: shipyarddeploymentconfigurations
+    shortNames:
+    - sdepconf
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          type: 'object'
+          properties:
+            physical_provisioner:
+              type: 'object'
+              properties:
+                deployment_strategy:
+                  type: 'string'
+                deploy_interval:
+                  type: 'integer'
+                deploy_timeout:
+                  type: 'integer'
+                destroy_interval:
+                  type: 'integer'
+                destroy_timeout:
+                  type: 'integer'
+                join_wait:
+                  type: 'integer'
+                prepare_node_interval:
+                  type: 'integer'
+                prepare_node_timeout:
+                  type: 'integer'
+                prepare_site_interval:
+                  type: 'integer'
+                prepare_site_timeout:
+                  type: 'integer'
+                verify_interval:
+                  type: 'integer'
+                verify_timeout:
+                  type: 'integer'
+              # additionalProperties: false
+            kubernetes:
+              type: 'object'
+              properties:
+                node_status_interval:
+                  type: 'integer'
+                node_status_timeout:
+                  type: 'integer'
+              # additionalProperties: false
+            kubernetes_provisioner:
+              type: 'object'
+              properties:
+                drain_timeout:
+                  type: 'integer'
+                drain_grace_period:
+                  type: 'integer'
+                clear_labels_timeout:
+                  type: 'integer'
+                remove_etcd_timeout:
+                  type: 'integer'
+                etcd_ready_timeout:
+                  type: 'integer'
+              # additionalProperties: false
+            armada:
+              type: 'object'
+              properties:
+                get_releases_timeout:
+                  type: 'integer'
+                get_status_timeout:
+                  type: 'integer'
+                manifest:
+                  type: 'string'
+                post_apply_timeout:
+                  type: 'integer'
+                validate_design_timeout:
+                  type: 'integer'
+              # additionalProperties: false
+              required:
+                - manifest
+          # additionalProperties: false
+          required:
+            - armada
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+...

@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: keystone-rabbitmq
+  name: keystone-rabbitmq
+  namespace: openstack
+spec:
+  values:
+    pod:
+      replicas:
+        server: 1

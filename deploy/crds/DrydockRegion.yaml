@@ -1,0 +1,103 @@
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: drydockregions.drydock.airshipit.org
+  labels:
+    application: drydock
+spec:
+  additionalPrinterColumns:
+  group: drydock.airshipit.org
+  version: v1alpha1
+  names:
+    kind: DrydockRegion
+    plural: drydockregions
+    shortNames:
+    - dreg
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          type: 'object'
+          properties:
+            tag_definitions:
+              type: 'array'
+              items:
+                type: 'object'
+                properties:
+                  tag:
+                    type: 'string'
+                  definition_type:
+                    type: 'string'
+                    enum:
+                      - 'lshw_xpath'
+                  definition:
+                    type: 'string'
+                # additionalProperties: false
+            authorized_keys:
+              type: 'array'
+              items:
+                type: 'string'
+            repositories:
+              # top level is class (e.g. apt, rpm)
+              type: 'object'
+              # TODO(jeb) properties:
+              # TODO(jeb)   remove_unlisted:
+              # TODO(jeb)     type: 'boolean'
+              additionalProperties:
+                type: 'object'
+                properties:
+                  repo_type:
+                    type: 'string'
+                    pattern: 'apt|rpm'
+                  url:
+                    type: 'string'
+                  distributions:
+                    type: 'array'
+                    items:
+                      type: 'string'
+                  subrepos:
+                    type: 'array'
+                    items:
+                      type: 'string'
+                  components:
+                    type: 'array'
+                    items:
+                      type: 'string'
+                  gpgkey:
+                    type: 'string'
+                  arches:
+                    type: 'array'
+                    items:
+                      type: 'string'
+                  options:
+                    type: 'object'
+                    additionalProperties:
+                      type: 'string'
+                # additionalProperties: false
+                required:
+                  - 'repo_type'
+                  - 'url'
+                #JEB  - 'arches'
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+...

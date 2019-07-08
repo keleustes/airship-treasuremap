@@ -1,0 +1,24 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockNetwork
+metadata:
+  name: pxe
+  namespace: drydock
+spec:
+  cidr: 10.22.70.0/24
+  dns:
+    domain: atlantafoundry.com
+    servers: 8.8.8.8,8.8.4.4,208.67.222.222
+  ranges:
+  - end: 10.22.70.10
+    start: 10.22.70.1
+    type: reserved
+  - end: 10.22.70.31
+    start: 10.22.70.21
+    type: static
+  - end: 10.22.70.80
+    start: 10.22.70.40
+    type: dhcp
+  routes:
+  - gateway: 10.22.70.1
+    metric: 100
+    subnet: 0.0.0.0/0

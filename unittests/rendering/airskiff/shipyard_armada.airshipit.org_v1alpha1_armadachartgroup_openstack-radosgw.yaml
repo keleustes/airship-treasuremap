@@ -1,0 +1,9 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: openstack-radosgw
+  namespace: shipyard
+spec:
+  chart_group:
+  - tenant-ceph-rgw
+  description: Deploy Radosgw

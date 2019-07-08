@@ -1,0 +1,65 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-ceph-rgw
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-rgw
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  release: ucp-ceph-rgw
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.ceph-rgw)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-ceph-rgw
+        type: job
+  values:
+    bootstrap:
+      enabled: false
+    ceph_client:
+      configmap: ceph-client-keys-etc
+    conf:
+      config:
+        rgw_keystone_token_cache_size: '0'
+      rgw_ks:
+        enabled: true
+    deployment:
+      ceph: true
+      rgw_keystone_user_and_endpoints: false
+    endpoints:
+      ceph_mon: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.ceph_mon)
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.admin)
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+          swift:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.swift.keystone)
+            password: $(DeckhandPassphrase.ceph-swift-keystone-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+      object_store: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.object_store)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ceph.ceph-rgw)
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      rgw:
+        node_selector_key: ceph-rgw
+        node_selector_value: enabled
+    network:
+      cluster: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.cluster_cidr)
+      public: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.public_cidr)
+    pod:
+      replicas:
+        rgw: 2
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-rgw
+    timeout: 900

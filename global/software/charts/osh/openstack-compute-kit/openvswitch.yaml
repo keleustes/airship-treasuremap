@@ -1,0 +1,46 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: openvswitch
+  name: openvswitch
+  namespace: openstack
+spec:
+  chart_name: openvswitch
+  dependencies:
+  - openvswitch-htk
+  install:
+    no_hooks: false
+  release: openvswitch
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.openvswitch)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-openvswitch
+        type: job
+  values:
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.openvswitch)
+    labels:
+      ovs:
+        node_selector_key: openvswitch
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-openvswitch
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: openvswitch-htk
+  namespace: pegleg
+spec:
+  chart_name: openvswitch-htk
+  dependencies: []
+  release: openvswitch-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.openvswitch-htk)
+  values: {}

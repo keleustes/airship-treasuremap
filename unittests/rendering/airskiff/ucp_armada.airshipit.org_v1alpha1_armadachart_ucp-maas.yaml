@@ -1,0 +1,161 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-maas
+  name: ucp-maas
+  namespace: ucp
+spec:
+  chart_name: maas
+  dependencies:
+  - maas-htk
+  install:
+    no_hooks: false
+  release: maas
+  source:
+    location: https://opendev.org/airship/maas
+    reference: edf2c549ad7a1fbe2c0251bda0edf2f2d0772413
+    subpath: charts/maas
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-maas
+        type: job
+  values:
+    conf:
+      cache:
+        enabled: true
+      maas:
+        credentials:
+          secret:
+            namespace: ucp
+        dns:
+          dns_servers: 8.8.8.8,8.8.4.4,208.67.222.222
+          require_dnssec: "no"
+        images:
+          default_image: xenial
+          default_kernel: hwe-16.04
+          default_os: ubuntu
+        ntp:
+          disable_ntpd_rack: true
+          disable_ntpd_region: true
+          ntp_servers: 0.ubuntu.pool.ntp.org,1.ubuntu.pool.ntp.org,2.ubuntu.pool.ntp.org,4.ubuntu.pool.ntp.org
+          use_external_only: "true"
+        proxy:
+          proxy_enabled: "true"
+    endpoints:
+      maas_db:
+        auth:
+          admin:
+            password: password123
+            username: postgres
+          user:
+            database: maasdb
+            password: password123
+            username: maas
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: postgresql
+        name: postgresql
+        path: /maasdb
+        port:
+          postgresql:
+            default: 5432
+        scheme: postgresql+psycopg2
+      maas_ingress:
+        host_fqdn_override:
+          public: null
+        hosts:
+          default: maas-ingress
+          error_pages: maas-ingress-error
+        port:
+          error_pages:
+            default: 8080
+            podport: 8080
+          healthz:
+            podport: 10259
+          http:
+            default: 80
+          https:
+            default: 443
+          ingress_default_server:
+            default: 8383
+          status:
+            podport: 18089
+      maas_region:
+        auth:
+          admin:
+            email: none@none
+            password: password123
+            username: admin
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: maas-region
+          public: maas-region
+        name: maas-region
+        path:
+          default: /MAAS
+        port:
+          region_api:
+            default: 80
+            nodeport: 31900
+            podport: 80
+            public: 80
+          region_proxy:
+            default: 8000
+        scheme:
+          default: http
+      physicalprovisioner:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: drydock-api
+          public: drydock-api
+        name: drydock
+        path:
+          default: /api/v1.0
+        port:
+          api:
+            default: 9000
+            nodeport: 31900
+            public: 80
+        scheme:
+          default: http
+          public: http
+    images:
+      tags:
+        bootstrap: quay.io/airshipit/maas-region-controller:edf2c549ad7a1fbe2c0251bda0edf2f2d0772413
+        db_sync: quay.io/airshipit/maas-region-controller:edf2c549ad7a1fbe2c0251bda0edf2f2d0772413
+        export_api_key: quay.io/airshipit/maas-region-controller:edf2c549ad7a1fbe2c0251bda0edf2f2d0772413
+        maas_cache: quay.io/airshipit/sstream-cache:edf2c549ad7a1fbe2c0251bda0edf2f2d0772413
+        maas_rack: quay.io/airshipit/maas-rack-controller:edf2c549ad7a1fbe2c0251bda0edf2f2d0772413
+        maas_region: quay.io/airshipit/maas-region-controller:edf2c549ad7a1fbe2c0251bda0edf2f2d0772413
+    jobs:
+      import_boot_resources:
+        timeout: 1800
+    labels:
+      rack:
+        node_selector_key: maas-rack
+        node_selector_value: enabled
+      region:
+        node_selector_key: maas-region
+        node_selector_value: enabled
+    network:
+      maas_ingress:
+        addr: $(PeglegCommonAddresses.common-addresses.spec.vip.maas_vip)
+    pod:
+      replicas:
+        rack: 2
+        region: 2
+    secrets:
+      maas_region:
+        value: 9026f6048d6a017dc913
+  wait:
+    labels:
+      release_group: airship-maas
+    timeout: 1800

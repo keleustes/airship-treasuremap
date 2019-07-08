@@ -1,0 +1,32 @@
+apiVersion: shipyard.airshipit.org/v1alpha1
+kind: ShipyardDeploymentStrategy
+metadata:
+  labels:
+    name: deployment-strategy
+  name: deployment-strategy
+  namespace: shipyard
+spec:
+  groups:
+  - critical: true
+    depends_on: []
+    name: masters
+    selectors:
+    - node_labels: []
+      node_names: []
+      node_tags:
+      - masters
+      rack_names: []
+    success_criteria:
+      percent_successful_nodes: 100
+  - critical: true
+    depends_on:
+    - masters
+    name: workers
+    selectors:
+    - node_labels: []
+      node_names: []
+      node_tags:
+      - workers
+      rack_names: []
+    success_criteria:
+      percent_successful_nodes: 60

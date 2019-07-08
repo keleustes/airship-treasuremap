@@ -1,0 +1,61 @@
+---
+apiVersion: promenade.airshipit.org/v1alpha1
+kind: PromenadeGenesis
+metadata:
+  labels:
+    name: genesis
+  name: genesis
+  namespace: drydock
+spec:
+  apiserver:
+    command_prefix:
+    - /apiserver
+    - --service-cluster-ip-range=$(PeglegCommonAddresses.common-addresses.spec.kubernetes.service_cidr)
+    - --service-node-port-range=$(PeglegCommonAddresses.common-addresses.spec.kubernetes.service_node_port_range)
+    - --authorization-mode=Node,RBAC
+    - --admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,PersistentVolumeLabel,DefaultStorageClass,ResourceQuota,DefaultTolerationSeconds
+    - --endpoint-reconciler-type=lease
+    - --feature-gates=PodShareProcessNamespace=true
+  armada:
+    target_manifest: cluster-bootstrap
+  files:
+  - content: |-
+      # placeholder for triggering calico etcd bootstrapping
+      # this file will be deleted
+    mode: 420
+    path: /var/lib/anchor/calico-etcd-bootstrap
+  hostname: $(PeglegCommonAddresses.common-addresses.spec.genesis.hostname)
+  images:
+    armada: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.armada.api)
+    helm:
+      tiller: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.armada.tiller)
+    kubernetes:
+      apiserver: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.apiserver.apiserver)
+      controller-manager: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.controller-manager.controller_manager)
+      etcd: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.etcd.etcd)
+      scheduler: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.scheduler.scheduler)
+  ip: $(PeglegCommonAddresses.common-addresses.spec.genesis.ip)
+  labels:
+    dynamic:
+    - beta.kubernetes.io/fluentd-ds-ready=true
+    - calico-etcd=enabled
+    - ceph-mds=enabled
+    - ceph-mon=enabled
+    - ceph-osd=enabled
+    - ceph-rgw=enabled
+    - ceph-mgr=enabled
+    - tenant-ceph-control-plane=enabled
+    - tenant-ceph-mon=enabled
+    - tenant-ceph-rgw=enabled
+    - tenant-ceph-mgr=enabled
+    - kube-dns=enabled
+    - kube-ingress=enabled
+    - kubernetes-apiserver=enabled
+    - kubernetes-controller-manager=enabled
+    - kubernetes-etcd=enabled
+    - kubernetes-scheduler=enabled
+    - promenade-genesis=enabled
+    - ucp-control-plane=enabled
+    - maas-rack=enabled
+    - maas-region=enabled
+    - node-exporter=enabled

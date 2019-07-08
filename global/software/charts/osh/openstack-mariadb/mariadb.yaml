@@ -1,0 +1,66 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: mariadb
+    name: openstack-mariadb
+  name: openstack-mariadb
+  namespace: openstack
+spec:
+  chart_name: openstack-mariadb
+  dependencies:
+  - openstack-mariadb-htk
+  install:
+    no_hooks: false
+  release: openstack-mariadb
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.mariadb)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-openstack-mariadb
+        type: job
+  values:
+    endpoints:
+      oslo_db:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.oslo_db.admin)
+            password: $(DeckhandPassphrase.osh-oslo-db-admin-password.spec)
+          exporter:
+            password: $(DeckhandPassphrase.osh-oslo-db-exporter-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_db)
+      prometheus_mysql_exporter:
+        auth:
+          user: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.prometheus_mysql_exporter.user)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.prometheus_mysql_exporter)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.mariadb)
+    labels:
+      prometheus_mysql_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: true
+  wait:
+    labels:
+      release_group: airship-openstack-mariadb
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: openstack-mariadb-htk
+  namespace: pegleg
+spec:
+  chart_name: openstack-mariadb-htk
+  dependencies: []
+  release: openstack-mariadb-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.mariadb-htk)
+  values: {}

@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: fluentd
+  name: fluentd
+  namespace: osh-infra
+spec:
+  values:
+    pod:
+      replicas:
+        fluentd: 1

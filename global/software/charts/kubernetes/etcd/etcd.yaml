@@ -1,0 +1,73 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-etcd
+  name: kubernetes-etcd
+  namespace: kube-system
+spec:
+  chart_name: etcd
+  dependencies:
+  - kubernetes-etcd-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-etcd
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.etcd)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-etcd
+        type: job
+  values:
+    anchor:
+      etcdctl_endpoint: $(PeglegCommonAddresses.common-addresses.spec.kubernetes.etcd_service_ip)
+    etcd:
+      host_data_path: /var/lib/etcd/kubernetes
+      host_etc_path: /etc/etcd/kubernetes
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.kubernetes.etcd)
+    labels:
+      anchor:
+        node_selector_key: kubernetes-etcd
+        node_selector_value: enabled
+    network:
+      service_client:
+        name: service-client
+        port: 2379
+        target_port: 2379
+      service_peer:
+        name: service-peer
+        port: 2380
+        target_port: 2380
+    secrets:
+      anchor:
+        tls:
+          cert: $(DeckhandCertificate.kubernetes-etcd-anchor.spec)
+          key: $(DeckhandCertificateKey.kubernetes-etcd-anchor.spec)
+      tls:
+        client:
+          ca: $(DeckhandCertificateAuthority.kubernetes-etcd.spec)
+        peer:
+          ca: $(DeckhandCertificateAuthority.kubernetes-etcd-peer.spec)
+    service:
+      ip: $(PeglegCommonAddresses.common-addresses.spec.kubernetes.etcd_service_ip)
+      name: kubernetes-etcd
+  wait:
+    labels:
+      release_group: airship-kubernetes-etcd
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kubernetes-etcd-htk
+  namespace: pegleg
+spec:
+  chart_name: kubernetes-etcd-htk
+  dependencies: []
+  release: kubernetes-etcd-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.kubernetes.etcd-htk)
+  values: {}

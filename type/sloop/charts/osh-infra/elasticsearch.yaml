@@ -1,0 +1,25 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: elasticsearch
+  name: elasticsearch
+  namespace: osh-infra
+spec:
+  values:
+    conf:
+      elasticsearch:
+        env:
+          java_opts:
+            client: -Xms768m -Xmx768m
+            data: -Xms768m -Xmx768m
+            master: -Xms768m -Xmx768m
+    pod:
+      replicas:
+        client: 2
+        data: 1
+        master: 2
+    storage:
+      requests:
+        storage: 50Gi

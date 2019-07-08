@@ -1,0 +1,109 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: horizon
+    name: horizon
+  name: horizon
+  namespace: openstack
+spec:
+  chart_name: horizon
+  dependencies:
+  - horizon-htk
+  install:
+    no_hooks: false
+  release: horizon
+  source:
+    location: https://opendev.org/openstack/openstack-helm
+    reference: 5ad45700f4a3287d7f55a6f5d75777b3ae744030
+    subpath: horizon
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-horizon
+        type: job
+  values:
+    endpoints:
+      dashboard:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: horizon-int
+          public: horizon
+        name: horizon
+        path:
+          default: ""
+        port:
+          web:
+            default: 80
+            public: 80
+        scheme:
+          default: http
+          public: http
+      identity:
+        auth:
+          admin:
+            password: password123
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: openstack
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      oslo_cache:
+        auth:
+          memcache_secret_key: password123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        namespace: openstack
+        port:
+          memcache:
+            default: 11211
+      oslo_db:
+        auth:
+          admin:
+            password: password123
+          horizon:
+            database: horizon
+            username: horizon
+          keystone:
+            password: password123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /horizon
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+    images:
+      tags: {}
+    labels:
+      horizon:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        server: 1
+  wait:
+    labels:
+      release_group: airship-horizon
+    timeout: 900

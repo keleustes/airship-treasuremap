@@ -1,0 +1,212 @@
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: promenadehostsystems.promenade.airshipit.org
+  labels:
+    application: promenade
+spec:
+  additionalPrinterColumns:
+  group: promenade.airshipit.org
+  version: v1alpha1
+  names:
+    kind: PromenadeHostSystem
+    plural: promenadehostsystems
+    shortNames:
+    - phostsys
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          # definitions:
+          #   abs_path:
+          #     type: string
+          #     pattern: '^/.+$'
+          #   apt_source_line:
+          #     type: string
+          #     # XXX add regex
+          #   file:
+          #     properties:
+          #       path:
+          #         # $ref: '#/definitions/abs_path'
+          #         type: string
+          #         pattern: '^/.+$'
+          #       content:
+          #         type: string
+          #       mode:
+          #         type: integer
+          #         minimum: 0
+          #       tar_url:
+          #         # $ref: '#/definitions/url'
+          #         type: string
+          #       tar_path:
+          #         # $ref: '#/definitions/rel_path'
+          #         type: string
+          #     required:
+          #       - mode
+          #       - path
+          #     oneOf:
+          #       - type: object
+          #         required:
+          #           - content
+          #       - type: object
+          #         allOf:
+          #           - type: object
+          #             required:
+          #               - tar_url
+          #               - tar_path
+          #     # additionalProperties: false
+          #   image:
+          #     type: string
+          #     # XXX add regex
+          #   package:
+          #     type: string
+          #     # XXX add regex
+          #   public_key:
+          #     type: string
+          #     # XXX add regex
+          #   rel_path:
+          #     type: string
+          #     # XXX add regex
+          #   url:
+          #     type: string
+          #     # XXX add regex
+        
+          type: object
+        
+          properties:
+            files:
+              type: array
+              items:
+                # $ref: '#/definitions/file'
+                type: object
+                properties:
+                  path:
+                    # $ref: '#/definitions/abs_path'
+                    type: string
+                    pattern: '^/.+$'
+                  content:
+                    type: string
+                  mode:
+                    type: integer
+                    minimum: 0
+                  tar_url:
+                    # $ref: '#/definitions/url'
+                    type: string
+                  tar_path:
+                    # $ref: '#/definitions/rel_path'
+                    type: string
+          
+                required:
+                  - mode
+                  - path
+                oneOf:
+                  - type: object
+                    required:
+                      - content
+                  - type: object
+                    allOf:
+                      - type: object
+                        required:
+                          - tar_url
+                          - tar_path
+                # additionalProperties: false
+
+            images:
+              type: object
+              properties:
+                haproxy:
+                  # $ref: '#/definitions/image'
+                  type: string
+                coredns:
+                  # $ref: '#/definitions/image'
+                  type: string
+                helm:
+                  type: object
+                  properties:
+                    helm:
+                      # $ref: '#/definitions/image'
+                      type: string
+                  required:
+                    - helm
+                  # additionalProperties: false
+                kubernetes:
+                  type: object
+                  properties:
+                    kubectl:
+                      # $ref: '#/definitions/image'
+                      type: string
+                  required:
+                    - kubectl
+                  # additionalProperties: false
+              required:
+                - haproxy
+                - coredns
+                - helm
+                - kubernetes
+              # additionalProperties: false
+        
+            packages:
+              type: object
+              properties:
+                additional:
+                  type: array
+                  items:
+                    # $ref: '#/definitions/package'
+                    type: string
+                keys:
+                  type: array
+                  items:
+                    # $ref: '#/definitions/public_key'
+                    type: string
+        
+                required:
+                  type: object
+                  properties:
+                    docker:
+                      # $ref: '#/definitions/package'
+                      type: string
+                    socat:
+                      # $ref: '#/definitions/package'
+                      type: string
+                  required:
+                    - docker
+                    - socat
+                  # additionalProperties: false
+        
+                repositories:
+                  type: array
+                  items:
+                    # $ref: '#/definitions/apt_source_line'
+                    type: string
+        
+              required:
+                - required
+              # additionalProperties: false
+        
+          required:
+            - images
+            - packages
+          # additionalProperties: false
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+...

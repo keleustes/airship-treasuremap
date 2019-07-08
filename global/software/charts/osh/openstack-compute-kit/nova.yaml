@@ -1,0 +1,230 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: nova
+    name: nova
+  name: nova
+  namespace: openstack
+spec:
+  chart_name: nova
+  dependencies:
+  - nova-htk
+  install:
+    no_hooks: false
+  release: nova
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.nova)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-nova
+        type: job
+  values:
+    ceph_client:
+      configmap: tenant-ceph-etc
+      user_secret_name: pvc-tceph-client-key
+    conf:
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.nova', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - 'null'
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_nova:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: nova
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - nova
+      nova:
+        libvirt:
+          cpu_mode: host-passthrough
+          virt_type: kvm
+        neutron:
+          metadata_proxy_shared_secret: $(DeckhandPassphrase.osh-nova-metadata-proxy-shared-secret.spec)
+    endpoints:
+      compute: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.compute)
+      compute_metadata: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.compute_metadata)
+      compute_novnc_proxy: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.compute_novnc_proxy)
+      compute_spice_proxy: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.compute_spice_proxy)
+      fluentd: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.fluentd)
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.admin)
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+          neutron:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.neutron.neutron)
+            password: $(DeckhandPassphrase.osh-neutron-password.spec)
+          nova:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.nova)
+            password: $(DeckhandPassphrase.osh-nova-password.spec)
+          placement:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.placement)
+            password: $(DeckhandPassphrase.osh-placement-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+      image: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.image)
+      network: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.network)
+      oslo_cache:
+        auth:
+          memcache_secret_key: $(DeckhandPassphrase.osh-oslo-cache-secret-key.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_cache)
+      oslo_db:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-oslo-db-admin-password.spec)
+          nova:
+            password: $(DeckhandPassphrase.osh-nova-oslo-db-password.spec)
+            username: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_db.username)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_db.database)
+      oslo_db_api:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-oslo-db-admin-password.spec)
+          nova:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_db_api)
+            password: $(DeckhandPassphrase.osh-nova-oslo-db-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_db_api.database)
+      oslo_db_cell0:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-oslo-db-admin-password.spec)
+          nova:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_db_cell0)
+            password: $(DeckhandPassphrase.osh-nova-oslo-db-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_db_cell0.database)
+      oslo_messaging:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_messaging.admin)
+            password: $(DeckhandPassphrase.osh-nova-oslo-messaging-admin-password.spec)
+          nova:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.nova.oslo_messaging.nova)
+            password: $(DeckhandPassphrase.osh-nova-oslo-messaging-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.nova_oslo_messaging)
+      placement: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.placement)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.nova)
+    labels:
+      #TODO(jeb): One of a kind schema
+      agent_compute:
+        node_selector_key: openstack-nova-compute
+        node_selector_value: enabled
+      api_metadata:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      conductor:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      consoleauth:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      novncproxy:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      osapi:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      placement:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      scheduler:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      spiceproxy:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      test:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api_metadata: 4
+        conductor: 4
+        consoleauth: 2
+        novncproxy: 2
+        osapi: 4
+        placement: 2
+        scheduler: 2
+  wait:
+    labels:
+      release_group: airship-nova
+    timeout: 2700
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: nova-htk
+  namespace: pegleg
+spec:
+  chart_name: nova-htk
+  dependencies: []
+  release: nova-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.nova-htk)
+  values: {}

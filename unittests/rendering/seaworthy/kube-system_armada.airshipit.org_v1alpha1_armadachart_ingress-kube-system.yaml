@@ -1,0 +1,54 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    ingress: kube-system
+    name: ingress-kube-system
+  name: ingress-kube-system
+  namespace: kube-system
+spec:
+  chart_name: ingress-kube-system
+  dependencies:
+  - ingress-kube-system-htk
+  install:
+    no_hooks: false
+  release: ingress-kube-system
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 596732f16bf7cfe681ce0bb2d62e529bea5eea82
+    subpath: ingress
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ingress-kube-system
+        type: job
+  values:
+    images:
+      tags: {}
+    labels:
+      error_server:
+        node_selector_key: kube-ingress
+        node_selector_value: enabled
+      server:
+        node_selector_key: kube-ingress
+        node_selector_value: enabled
+    network:
+      host_namespace: true
+      ingress:
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-read-timeout: "603"
+        disable-ipv6: "true"
+      vip:
+        addr: 10.23.21.20/32
+        manage: true
+    pod:
+      replicas:
+        error_page: 1
+        ingress: 1
+  wait:
+    labels:
+      release_group: airship-ingress-kube-system
+    timeout: 300

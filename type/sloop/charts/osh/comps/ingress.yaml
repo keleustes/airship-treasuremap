@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: openstack-ingress-controller
+  name: openstack-ingress-controller
+  namespace: openstack
+spec:
+  values:
+    pod:
+      replicas:
+        error_page: 1
+        ingress: 1

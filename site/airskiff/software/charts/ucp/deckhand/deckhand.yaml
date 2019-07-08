@@ -1,0 +1,20 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-deckhand
+  namespace: ucp
+spec:
+  source:
+    location: /airship-components/deckhand
+    subpath: charts/deckhand
+    type: local
+  values:
+    images:
+      tags:
+        api: quay.io/airshipit/deckhand:latest-ubuntu_xenial
+    pod:
+      replicas:
+        deckhand: 1
+  wait:
+    timeout: 1800

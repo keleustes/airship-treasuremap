@@ -1,0 +1,115 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockHostProfile
+metadata:
+  name: cp-r740-secondary
+  namespace: drydock
+spec:
+  hardware_profile: dell_r720
+  interfaces:
+    bond0:
+      device_link: data
+      networks:
+      - oam
+      - storage
+      - overlay
+      - calico
+      slaves:
+      - data_nic01
+      - data_nic02
+      - data_nic03
+      - data_nic04
+    pxe:
+      device_link: pxe
+      networks:
+      - pxe
+      slaves:
+      - pxe_nic01
+  metadata:
+    owner_data:
+      IAM: enabled
+      beta.kubernetes.io/fluentd-ds-ready: "true"
+      calico-node: enabled
+      calico-policy: enabled
+      ceph-mds: enabled
+      ceph-mgr: enabled
+      ceph-osd: enabled
+      ceph-rgw: enabled
+      control-plane: enabled
+      elasticsearch-client: enabled
+      elasticsearch-data: enabled
+      elasticsearch-master: enabled
+      fluentd: enabled
+      influxdb: enabled
+      kibana: enabled
+      kube-dns: enabled
+      kube-ingress: enabled
+      kubernetes-apiserver: enabled
+      kubernetes-controller-manager: enabled
+      kubernetes-scheduler: enabled
+      node-exporter: enabled
+      openstack-cinder-control: enabled
+      openstack-cinder-volume: control
+      openstack-control-plane: enabled
+      openstack-dns-helper: enabled
+      openstack-glance: enabled
+      openstack-heat: enabled
+      openstack-horizon: enabled
+      openstack-keystone: enabled
+      openstack-mariadb: enabled
+      openstack-memcached: enabled
+      openstack-mistral: enabled
+      openstack-neutron: enabled
+      openstack-nova-control: enabled
+      openstack-rabbitmq: enabled
+      openvswitch: enabled
+      postgresql: enabled
+      prometheus-client: enabled
+      prometheus-server: enabled
+      tenant-ceph-control-plane: enabled
+      tenant-ceph-mgr: enabled
+      tenant-ceph-rgw: enabled
+      tiller-helm: enabled
+      ucp-armada: enabled
+      ucp-barbican: enabled
+      ucp-control-plane: enabled
+      ucp-deckhand: enabled
+      ucp-drydock: enabled
+      ucp-maas: enabled
+      ucp-promenade: enabled
+      ucp-shipyard: enabled
+  platform:
+    kernel: hwe-16.04
+    kernel_params:
+      console: ttyS1,115200n8
+  primary_network: oam
+  storage:
+    physical_devices:
+      bootdisk:
+        labels:
+          bootdrive: "true"
+        partitions:
+        - bootable: true
+          filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /
+          name: root
+          size: 30g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /boot
+          name: boot
+          size: 1g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /var/log
+          name: var_log
+          size: 100g
+        - filesystem:
+            fstype: ext4
+            mount_options: defaults
+            mountpoint: /var
+          name: var
+          size: '>100g'

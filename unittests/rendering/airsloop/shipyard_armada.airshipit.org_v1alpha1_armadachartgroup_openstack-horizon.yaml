@@ -1,0 +1,12 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  labels:
+    component: horizon
+    name: openstack-horizon-chart-group
+  name: openstack-horizon
+  namespace: shipyard
+spec:
+  chart_group:
+  - horizon
+  description: Deploy Horizon

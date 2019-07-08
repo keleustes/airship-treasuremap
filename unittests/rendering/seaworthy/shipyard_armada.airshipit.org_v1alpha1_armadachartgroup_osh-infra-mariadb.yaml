@@ -1,0 +1,9 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: osh-infra-mariadb
+  namespace: shipyard
+spec:
+  chart_group:
+  - osh-infra-mariadb
+  description: OpenStack-Infra MariaDB

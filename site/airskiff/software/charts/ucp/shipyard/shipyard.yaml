@@ -1,0 +1,30 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-shipyard
+  namespace: ucp
+spec:
+  source:
+    location: /airship-components/shipyard
+    subpath: charts/shipyard
+    type: local
+  values:
+    conf:
+      shipyard:
+        drydock:
+          service_type: armada
+        promenade:
+          service_type: armada
+    images:
+      tags:
+        airflow: quay.io/airshipit/airflow:latest-ubuntu_xenial
+        shipyard: quay.io/airshipit/shipyard:latest-ubuntu_xenial
+    pod:
+      replicas:
+        #TODO(jeb): One of kind replica structure
+        airflow_scheduler: 1
+        airflow_worker: 1
+        shipyard_api: 1
+  wait:
+    timeout: 1800

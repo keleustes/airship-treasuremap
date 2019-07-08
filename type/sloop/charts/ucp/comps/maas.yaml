@@ -1,0 +1,41 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-maas
+  name: ucp-maas
+  namespace: ucp
+spec:
+  values:
+    conf:
+      drydock:
+        bootaction_url: http://$(PeglegCommonAddresses.common-addresses.spec.bootstrap.ip):$(PeglegCommonAddresses.common-addresses.spec.node_ports.drydock_api)/api/v1.0
+      maas:
+        credentials:
+          secret:
+            namespace: ucp
+        images:
+          default_image: xenial
+          default_kernel: ga-16.04
+          default_os: ubuntu
+        url:
+          maas_url: http://$(PeglegCommonAddresses.common-addresses.spec.bootstrap.ip):$(PeglegCommonAddresses.common-addresses.spec.node_ports.maas_api)/MAAS
+    endpoints:
+      maas_region:
+        port:
+          region_api:
+            nodeport: $(PeglegCommonAddresses.common-addresses.spec.node_ports.maas_api)
+          region_proxy:
+            default: $(PeglegCommonAddresses.common-addresses.spec.node_ports.maas_proxy)
+    manifests:
+      maas_ingress: false
+    network:
+      region_api:
+        ingress:
+          public: false
+        node_port:
+          enabled: true
+      region_proxy:
+        node_port:
+          enabled: true

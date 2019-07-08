@@ -1,0 +1,12 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: osh-infra-logging
+  namespace: shipyard
+spec:
+  chart_group:
+  - elasticsearch
+  - fluentbit
+  - fluentd
+  description: OSH Infra Logging
+  sequenced: true

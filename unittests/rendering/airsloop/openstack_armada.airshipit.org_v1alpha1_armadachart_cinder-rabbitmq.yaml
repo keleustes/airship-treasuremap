@@ -1,0 +1,81 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: cinder
+    name: cinder-rabbitmq
+  name: cinder-rabbitmq
+  namespace: openstack
+spec:
+  chart_name: cinder-rabbitmq
+  dependencies:
+  - cinder-rabbitmq-htk
+  install:
+    no_hooks: false
+  release: cinder-rabbitmq
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 0714b9d7ae08a88565d2c81c1b185fd77efaafca
+    subpath: rabbitmq
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-cinder-rabbitmq
+        type: job
+  values:
+    endpoints:
+      oslo_messaging:
+        auth:
+          erlang_cookie: airsloop123
+          user:
+            password: airsloop123
+            username: cinder-rabbitmq-admin
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: cinder-rabbitmq
+        namespace: openstack
+        path: /cinder
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: rabbit
+      prometheus_rabbitmq_exporter:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: cinder-rabbitmq-exporter
+        namespace: openstack
+        path:
+          default: /metrics
+        port:
+          metrics:
+            default: 9095
+        scheme:
+          default: http
+    images:
+      tags: {}
+    labels:
+      prometheus_rabbitmq_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: true
+    pod:
+      replicas:
+        server: 1
+  wait:
+    labels:
+      release_group: airship-cinder-rabbitmq
+    resources:
+    - type: statefulset
+    timeout: 900

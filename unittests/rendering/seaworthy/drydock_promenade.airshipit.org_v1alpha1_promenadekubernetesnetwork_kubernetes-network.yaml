@@ -1,0 +1,30 @@
+apiVersion: promenade.airshipit.org/v1alpha1
+kind: PromenadeKubernetesNetwork
+metadata:
+  name: kubernetes-network
+  namespace: drydock
+spec:
+  dns:
+    bootstrap_validation_checks:
+    - calico-etcd.kube-system.svc.cluster.local
+    - kubernetes-etcd.kube-system.svc.cluster.local
+    - kubernetes.default.svc.cluster.local
+    cluster_domain: cluster.local
+    service_ip: 10.96.0.10
+    upstream_servers:
+    - 8.8.8.8
+    - 8.8.4.4
+    - 208.67.222.222
+  etcd:
+    container_port: 2379
+    haproxy_port: 2378
+  kubernetes:
+    apiserver_port: 6443
+    haproxy_port: 6553
+    pod_cidr: 10.97.0.0/16
+    service_cidr: 10.96.0.0/16
+    service_ip: 10.96.0.1
+  proxy:
+    additional_no_proxy:
+    - 127.0.0.1
+    url: ""

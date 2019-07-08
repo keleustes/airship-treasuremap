@@ -1,0 +1,77 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: tenant-ceph-osd
+  name: tenant-ceph-osd
+  namespace: tenant-ceph
+spec:
+  chart_name: tenant-ceph-osd
+  dependencies:
+  - tenant-ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: tenant-ceph-osd
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-osd
+    type: git
+  upgrade:
+    no_hooks: false
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: 9e45aa5f-9d75-4fa7-bde5-c99e4a7db7a1
+        osd:
+          osd_op_num_threads_per_hdd: 2
+          osd_op_num_threads_per_ssd: 4
+      osd:
+        osd_crush_chooseleaf_type: 0
+      storage:
+        mon:
+          directory: /var/lib/openstack-helm/tenant-ceph/mon
+        osd:
+        - data:
+            location: /var/lib/openstack-helm/tenant-ceph/osd/osd-one
+            type: directory
+          journal:
+            location: /var/lib/openstack-helm/tenant-ceph/osd/journal-one
+            type: directory
+        osd_log_directory: /var/log/tenant-ceph
+    endpoints:
+      ceph_mgr:
+        namespace: tenant-ceph
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: tenant-ceph
+        port:
+          mon:
+            default: 6790
+      fluentd:
+        namespace: osh-infra
+    images:
+      tags: {}
+    labels:
+      osd:
+        node_selector_key: tenant-ceph-osd
+        node_selector_value: enabled
+    monitoring:
+      ceph_mgr:
+        port: 9284
+    network:
+      cluster: 10.22.73.0/24
+      public: 10.22.73.0/24
+  wait:
+    labels:
+      release_group: airship-tenant-ceph-osd
+    timeout: 900

@@ -1,0 +1,99 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-maas
+  name: ucp-maas
+  namespace: ucp
+spec:
+  chart_name: maas
+  dependencies:
+  - maas-htk
+  install:
+    no_hooks: false
+  release: maas
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.maas)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-maas
+        type: job
+  values:
+    conf:
+      cache:
+        enabled: true
+      maas:
+        credentials:
+          secret:
+            namespace: ucp
+        dns:
+          dns_servers: $(PeglegCommonAddresses.common-addresses.spec.dns.upstream_servers_joined)
+          require_dnssec: 'no'
+        images:
+          default_image: xenial
+          default_kernel: hwe-16.04
+          default_os: ubuntu
+        ntp:
+          disable_ntpd_rack: true
+          disable_ntpd_region: true
+          ntp_servers: $(PeglegCommonAddresses.common-addresses.spec.ntp.servers_joined)
+          use_external_only: 'true'
+        proxy:
+          proxy_enabled: 'true'
+    endpoints:
+      maas_db:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.postgres.admin)
+            password: $(DeckhandPassphrase.ucp-postgres-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.maas.postgres)
+            password: $(DeckhandPassphrase.ucp-maas-postgres-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.postgresql)
+        path: /$(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.maas.postgres.database)
+      maas_ingress: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.maas_ingress)
+      maas_region:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.maas.admin)
+            password: $(DeckhandPassphrase.ucp-maas-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.maas_region)
+      physicalprovisioner: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.physicalprovisioner)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.maas)
+    jobs:
+      import_boot_resources:
+        timeout: 1800
+    labels:
+      rack:
+        node_selector_key: maas-rack
+        node_selector_value: enabled
+      region:
+        node_selector_key: maas-region
+        node_selector_value: enabled
+    pod:
+      replicas:
+        rack: 1
+        region: 1
+    secrets:
+      maas_region:
+        value: $(DeckhandPassphrase.maas-region-key.spec)
+  wait:
+    labels:
+      release_group: airship-maas
+    timeout: 1800
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: maas-htk
+  namespace: pegleg
+spec:
+  chart_name: maas-htk
+  dependencies: []
+  release: maas-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.maas-htk)
+  values: {}

@@ -1,0 +1,28 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaManifest
+metadata:
+  labels:
+    name: cluster-bootstrap
+  name: cluster-bootstrap
+  namespace: shipyard
+spec:
+  chart_groups:
+  - podsecuritypolicy
+  - kubernetes-proxy
+  - kubernetes-container-networking
+  - kubernetes-dns
+  - kubernetes-etcd
+  - kubernetes-haproxy
+  - kubernetes-core
+  - ingress-kube-system
+  - ucp-ceph
+  - ucp-ceph-config
+  - ucp-core
+  - ucp-keystone
+  - ucp-divingbell
+  - ucp-armada
+  - ucp-deckhand
+  - ucp-drydock
+  - ucp-promenade
+  - ucp-shipyard
+  release_prefix: airship

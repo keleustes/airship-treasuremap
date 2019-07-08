@@ -1,0 +1,20 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-divingbell
+  name: ucp-divingbell
+  namespace: ucp
+spec:
+  values:
+    manifests:
+      daemonset_apparmor: false
+      daemonset_apt: true
+      daemonset_ethtool: false
+      daemonset_exec: true
+      daemonset_limits: false
+      daemonset_mounts: false
+      daemonset_perm: false
+      daemonset_sysctl: false
+      daemonset_uamlite: false

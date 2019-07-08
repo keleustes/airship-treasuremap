@@ -1,0 +1,48 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: podsecuritypolicy
+  name: podsecuritypolicy
+  namespace: ucp
+spec:
+  chart_name: podsecuritypolicy
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: true
+  release: podsecuritypolicy
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh_infra.podsecuritypolicy)
+  upgrade:
+    no_hooks: true
+  values:
+    conf:
+      defaults:
+        authenticated: psp-default
+        serviceaccounts: psp-default
+        unauthenticated: nil
+    data:
+      psp-default:
+        allowPrivilegeEscalation: true
+        allowedCapabilities:
+        - '*'
+        fsGroup:
+          rule: RunAsAny
+        hostIPC: true
+        hostNetwork: true
+        hostPID: true
+        hostPorts:
+        - max: 65536
+          min: 1
+        privileged: true
+        runAsUser:
+          rule: RunAsAny
+        seLinux:
+          rule: RunAsAny
+        supplementalGroups:
+          rule: RunAsAny
+        volumes:
+        - '*'
+  wait:
+    resources: []

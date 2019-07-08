@@ -1,0 +1,15 @@
+---
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockBootAction
+metadata:
+  name: seccomp-profiles
+  namespace: drydock
+spec:
+  assets:
+  - data: $(PeglegSeccompProfile.seccomp-default.spec.content)
+    data_pipeline:
+    - utf8_decode
+    path: $(PeglegSeccompProfile.seccomp-default.spec.savePath)
+    permissions: '600'
+    type: file
+  signaling: false

@@ -1,0 +1,106 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-osd
+  name: ucp-ceph-osd
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-osd
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: ucp-ceph-osd
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-osd
+    type: git
+  upgrade:
+    no_hooks: false
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: 7b7576f4-3358-4668-9112-100440079807
+      osd:
+        osd_crush_chooseleaf_type: 0
+      storage:
+        osd:
+        - data:
+            location: /dev/sdd
+            type: block-logical
+          journal:
+            location: /dev/sdb1
+            type: block-logical
+        - data:
+            location: /dev/sde
+            type: block-logical
+          journal:
+            location: /dev/sdb2
+            type: block-logical
+        - data:
+            location: /dev/sdf
+            type: block-logical
+          journal:
+            location: /dev/sdb3
+            type: block-logical
+        - data:
+            location: /dev/sdg
+            type: block-logical
+          journal:
+            location: /dev/sdb4
+            type: block-logical
+        - data:
+            location: /dev/sdh
+            type: block-logical
+          journal:
+            location: /dev/sdc1
+            type: block-logical
+        - data:
+            location: /dev/sdi
+            type: block-logical
+          journal:
+            location: /dev/sdc2
+            type: block-logical
+        - data:
+            location: /dev/sdj
+            type: block-logical
+          journal:
+            location: /dev/sdc3
+            type: block-logical
+        - data:
+            location: /dev/sdk
+            type: block-logical
+          journal:
+            location: /dev/sdc4
+            type: block-logical
+    endpoints:
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: ceph
+        port:
+          mon:
+            default: 6789
+    images:
+      tags: {}
+    labels:
+      osd:
+        node_selector_key: ceph-osd
+        node_selector_value: enabled
+    network:
+      cluster: 10.23.23.0/24
+      public: 10.23.23.0/24
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-osd
+    timeout: 900

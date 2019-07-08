@@ -1,0 +1,53 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-controller-manager
+  name: kubernetes-controller-manager
+  namespace: kube-system
+spec:
+  chart_name: controller-manager
+  dependencies:
+  - kubernetes-controller-manager-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-controller-manager
+  source:
+    location: https://opendev.org/airship/promenade
+    reference: 44b5fae04788c6a28de0f9a2e132204561474d47
+    subpath: charts/controller_manager
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-controller-manager
+        type: job
+  values:
+    command_prefix:
+    - /controller-manager
+    - --cluster-cidr=10.97.0.0/16
+    - --service-cluster-ip-range=10.96.0.0/16
+    - --node-monitor-period=5s
+    - --node-monitor-grace-period=20s
+    - --pod-eviction-timeout=60s
+    images:
+      tags:
+        anchor: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+        controller_manager: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+    network:
+      kubernetes_netloc: 127.0.0.1:6553
+      pod_cidr: 10.97.0.0/16
+      service_cidr: 10.96.0.0/16
+    secrets:
+      service_account:
+        private_key: $(DeckhandPrivateKey.service-account.spec)
+      tls:
+        ca: $(DeckhandCertificateAuthority.kubernetes.spec)
+        cert: $(DeckhandCertificate.controller-manager.spec)
+        key: $(DeckhandCertificateKey.controller-manager.spec)
+  wait:
+    labels:
+      release_group: airship-kubernetes-controller-manager
+    timeout: 600

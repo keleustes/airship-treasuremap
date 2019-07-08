@@ -1,0 +1,12 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-ceph-client-update
+  namespace: ceph
+spec:
+  values:
+    conf:
+      pool:
+        target:
+          osd: 24

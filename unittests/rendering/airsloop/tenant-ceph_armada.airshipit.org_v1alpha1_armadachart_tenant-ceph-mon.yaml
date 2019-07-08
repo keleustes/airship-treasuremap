@@ -1,0 +1,80 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: tenant-ceph-mon
+  name: tenant-ceph-mon
+  namespace: tenant-ceph
+spec:
+  chart_name: tenant-ceph-mon
+  dependencies:
+  - tenant-ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: tenant-ceph-mon
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-mon
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-tenant-ceph-mon
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: 9e45aa5f-9d75-4fa7-bde5-c99e4a7db7a1
+      storage:
+        mon:
+          directory: /var/lib/openstack-helm/tenant-ceph/mon
+          log_directory: /var/log/tenant-ceph
+    deployment:
+      ceph: true
+      storage_secrets: true
+    endpoints:
+      ceph_mgr:
+        namespace: tenant-ceph
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: tenant-ceph
+        port:
+          mon:
+            default: 6790
+      fluentd:
+        namespace: osh-infra
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: tenant-ceph-control-plane
+        node_selector_value: enabled
+      mon:
+        node_selector_key: tenant-ceph-mon
+        node_selector_value: enabled
+    monitoring:
+      ceph_mgr:
+        port: 9284
+    network:
+      cluster: 10.22.73.0/24
+      public: 10.22.73.0/24
+    storageclass:
+      rbd:
+        parameters:
+          adminSecretNamespace: tenant-ceph
+  wait:
+    labels:
+      release_group: airship-tenant-ceph-mon
+    timeout: 1800

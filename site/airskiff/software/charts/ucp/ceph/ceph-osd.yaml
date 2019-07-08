@@ -1,0 +1,59 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-ceph-osd
+  namespace: ceph
+spec:
+  values:
+    conf:
+      storage:
+        osd:
+        - data:
+            location: /dev/sdd
+            type: block-logical
+          journal:
+            location: /dev/sdb1
+            type: block-logical
+        - data:
+            location: /dev/sde
+            type: block-logical
+          journal:
+            location: /dev/sdb2
+            type: block-logical
+        - data:
+            location: /dev/sdf
+            type: block-logical
+          journal:
+            location: /dev/sdb3
+            type: block-logical
+        - data:
+            location: /dev/sdg
+            type: block-logical
+          journal:
+            location: /dev/sdb4
+            type: block-logical
+        - data:
+            location: /dev/sdh
+            type: block-logical
+          journal:
+            location: /dev/sdc1
+            type: block-logical
+        - data:
+            location: /dev/sdi
+            type: block-logical
+          journal:
+            location: /dev/sdc2
+            type: block-logical
+        - data:
+            location: /dev/sdj
+            type: block-logical
+          journal:
+            location: /dev/sdc3
+            type: block-logical
+        - data:
+            location: /dev/sdk
+            type: block-logical
+          journal:
+            location: /dev/sdc4
+            type: block-logical

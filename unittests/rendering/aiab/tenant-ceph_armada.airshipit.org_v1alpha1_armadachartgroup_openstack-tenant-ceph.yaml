@@ -1,0 +1,14 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: openstack-tenant-ceph
+  namespace: tenant-ceph
+spec:
+  chart_group:
+  - tenant-ceph-ingress
+  - tenant-ceph-mon
+  - tenant-ceph-osd
+  - tenant-ceph-client
+  - tenant-ceph-config
+  description: Ceph Storage
+  sequenced: true

@@ -1,0 +1,15 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ucp-maas
+  namespace: ucp
+spec:
+  values:
+    network:
+      maas_ingress:
+        addr: $(PeglegCommonAddresses.common-addresses.spec.vip.maas_vip)
+    pod:
+      replicas:
+        rack: 2
+        region: 2

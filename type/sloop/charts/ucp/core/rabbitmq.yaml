@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-rabbitmq
+  name: ucp-rabbitmq
+  namespace: ucp
+spec:
+  values:
+    pod:
+      replicas:
+        server: 1

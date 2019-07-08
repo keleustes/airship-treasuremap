@@ -1,0 +1,12 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: tenant-ceph-client
+  namespace: tenant-ceph
+spec:
+  values:
+    conf:
+      pool:
+        target:
+          osd: 12

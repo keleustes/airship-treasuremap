@@ -1,0 +1,421 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: nova
+    name: nova
+  name: nova
+  namespace: openstack
+spec:
+  chart_name: nova
+  dependencies:
+  - nova-htk
+  install:
+    no_hooks: false
+  release: nova
+  source:
+    location: https://opendev.org/openstack/openstack-helm
+    reference: 47cb52b67c016aa364db9599db39fef719e4ae07
+    subpath: nova
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-nova
+        type: job
+  values:
+    ceph_client:
+      configmap: tenant-ceph-etc
+      user_secret_name: pvc-tceph-client-key
+    conf:
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.nova', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - "null"
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_nova:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: nova
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - nova
+      nova:
+        libvirt:
+          cpu_mode: host-passthrough
+          virt_type: kvm
+        neutron:
+          metadata_proxy_shared_secret: password123
+    endpoints:
+      compute:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-api
+          public: nova
+        name: nova
+        path:
+          default: /v2/%(tenant_id)s
+        port:
+          api:
+            default: 8774
+            public: 80
+          novncproxy:
+            default: 80
+        scheme:
+          default: http
+          public: http
+      compute_metadata:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-metadata
+          public: metadata
+        name: nova
+        path:
+          default: /
+        port:
+          metadata:
+            default: 8775
+            public: 80
+        scheme:
+          default: http
+      compute_novnc_proxy:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-novncproxy
+          public: novncproxy
+        name: nova
+        path:
+          default: /vnc_auto.html
+        port:
+          novnc_proxy:
+            default: 6080
+            public: 80
+        scheme:
+          default: http
+          public: http
+      compute_spice_proxy:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-spiceproxy
+        name: nova
+        path:
+          default: /spice_auto.html
+        port:
+          spice_proxy:
+            default: 6082
+        scheme:
+          default: http
+      fluentd:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: fluentd-logging
+        name: fluentd
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          metrics:
+            default: 24220
+          service:
+            default: 24224
+        scheme:
+          default: http
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: airsloop
+            user_domain_name: default
+            username: admin
+          neutron:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: airsloop
+            role: admin
+            user_domain_name: default
+            username: neutron
+          nova:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: airsloop
+            role: admin
+            user_domain_name: default
+            username: nova
+          placement:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: airsloop
+            role: admin
+            user_domain_name: default
+            username: placement
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: openstack
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      image:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: glance-api
+          public: glance
+        name: glance
+        path:
+          default: ""
+        port:
+          api:
+            default: 9292
+            public: 80
+        scheme:
+          default: http
+          public: http
+      network:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: neutron-server
+          public: neutron
+        name: neutron
+        path:
+          default: ""
+        port:
+          api:
+            default: 9696
+            public: 80
+        scheme:
+          default: http
+          public: http
+      oslo_cache:
+        auth:
+          memcache_secret_key: airsloop123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        namespace: openstack
+        port:
+          memcache:
+            default: 11211
+      oslo_db:
+        auth:
+          admin:
+            password: airsloop123
+          nova:
+            password: airsloop123
+            username: nova
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /nova
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+      oslo_db_api:
+        auth:
+          admin:
+            password: airsloop123
+          nova:
+            database: nova_api
+            password: airsloop123
+            username: nova
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /nova_api
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+      oslo_db_cell0:
+        auth:
+          admin:
+            password: airsloop123
+          nova:
+            database: nova_cell0
+            password: airsloop123
+            username: nova
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /nova_cell0
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+      oslo_messaging:
+        auth:
+          admin:
+            password: airsloop123
+            username: nova-rabbitmq-admin
+          nova:
+            password: airsloop123
+            username: nova-rabbitmq-user
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: nova-rabbitmq
+        namespace: openstack
+        path: /nova
+        port:
+          amqp:
+            default: 5672
+          http:
+            default: 15672
+        scheme: rabbit
+      placement:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: placement-api
+          public: placement
+        name: placement
+        path:
+          default: /
+        port:
+          api:
+            default: 8778
+            public: 80
+        scheme:
+          default: http
+          public: http
+    images:
+      tags: {}
+    labels:
+      agent_compute:
+        node_selector_key: openstack-nova-compute
+        node_selector_value: enabled
+      api_metadata:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      conductor:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      consoleauth:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      novncproxy:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      osapi:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      placement:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      scheduler:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      spiceproxy:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      test:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api_metadata: 1
+        compute_ironic: 1
+        conductor: 1
+        consoleauth: 1
+        novncproxy: 1
+        osapi: 1
+        placement: 1
+        scheduler: 1
+        spiceproxy: 1
+  wait:
+    labels:
+      release_group: airship-nova
+    timeout: 2700

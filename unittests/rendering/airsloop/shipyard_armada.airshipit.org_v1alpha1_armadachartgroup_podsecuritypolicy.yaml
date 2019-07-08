@@ -1,0 +1,9 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: podsecuritypolicy
+  namespace: shipyard
+spec:
+  chart_group:
+  - podsecuritypolicy
+  description: Cluster Pod Security Policy definitions

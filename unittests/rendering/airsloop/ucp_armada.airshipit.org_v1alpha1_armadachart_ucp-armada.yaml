@@ -1,0 +1,96 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-armada
+  name: ucp-armada
+  namespace: ucp
+spec:
+  chart_name: armada
+  dependencies:
+  - armada-htk
+  install:
+    no_hooks: false
+  release: ucp-armada
+  source:
+    location: https://opendev.org/airship/armada
+    reference: 2f28fb5bf04a613d9d31e53ff310c98555f6d179
+    subpath: charts/armada
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-armada
+        type: job
+  values:
+    conf:
+      armada:
+        DEFAULT:
+          debug: true
+          tiller_namespace: kube-system
+    endpoints:
+      armada:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: armada-api
+          public: armada
+        name: armada
+        path:
+          default: /api/v1.0
+        port:
+          api:
+            default: 8000
+        scheme:
+          default: http
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+          user:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: RegionOne
+            role: admin
+            user_domain_name: default
+            username: armada
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: ucp
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+    images:
+      tags:
+        api: quay.io/airshipit/armada:2f28fb5bf04a613d9d31e53ff310c98555f6d179-ubuntu_xenial
+        helm: docker.io/lachlanevenson/k8s-helm:v2.13.1
+        tiller: gcr.io/kubernetes-helm/tiller:v2.13.1
+    manifests:
+      deployment_tiller: false
+      service_tiller_deploy: false
+    pod:
+      env:
+        armada_api:
+        - name: ARMADA_UWSGI_TIMEOUT
+          value: 14400
+      replicas:
+        api: 1
+  wait:
+    labels:
+      release_group: airship-ucp-armada
+    timeout: 100

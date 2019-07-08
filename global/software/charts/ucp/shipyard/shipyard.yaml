@@ -1,0 +1,108 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-shipyard
+  name: ucp-shipyard
+  namespace: ucp
+spec:
+  chart_name: shipyard
+  dependencies:
+  - shipyard-htk
+  install:
+    no_hooks: false
+  release: ucp-shipyard
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.shipyard)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-shipyard
+        type: job
+  values:
+    conf:
+      shipyard:
+        keystone_authtoken:
+          memcache_security_strategy: None
+    endpoints:
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.keystone.admin)
+            password: $(DeckhandPassphrase.ucp-keystone-admin-password.spec)
+          shipyard:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.shipyard.keystone)
+            password: $(DeckhandPassphrase.ucp-shipyard-keystone-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.identity)
+      oslo_cache: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.oslo_cache)
+      oslo_messaging:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.airflow.oslo_messaging.admin)
+            password: $(DeckhandPassphrase.ucp-oslo-messaging-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.airflow.oslo_messaging.user)
+            password: $(DeckhandPassphrase.ucp-airflow-oslo-messaging-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.airflow_oslo_messaging)
+      postgresql_airflow_celery_db:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.postgres.admin)
+            password: $(DeckhandPassphrase.ucp-postgres-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.airflow.postgres)
+            password: $(DeckhandPassphrase.ucp-airflow-postgres-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.postgresql_airflow_celery)
+        path: /$(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.airflow.postgres.database)
+      postgresql_airflow_db:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.postgres.admin)
+            password: $(DeckhandPassphrase.ucp-postgres-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.airflow.postgres)
+            password: $(DeckhandPassphrase.ucp-airflow-postgres-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.postgresql)
+        path: /$(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.airflow.postgres.database)
+      postgresql_shipyard_db:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.postgres.admin)
+            password: $(DeckhandPassphrase.ucp-postgres-admin-password.spec)
+          user:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.shipyard.postgres)
+            password: $(DeckhandPassphrase.ucp-shipyard-postgres-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.postgresql)
+        path: /$(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.shipyard.postgres.database)
+      shipyard: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.shipyard)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.shipyard)
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        #TODO(jeb): One of kind replica structure
+        airflow_scheduler: 1
+        airflow_worker: 2
+        shipyard_api: 2
+    prod_environment: true
+  wait:
+    labels:
+      release_group: airship-ucp-shipyard
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: shipyard-htk
+  namespace: pegleg
+spec:
+  chart_name: shipyard-htk
+  dependencies: []
+  release: shipyard-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.shipyard-htk)
+  values: {}

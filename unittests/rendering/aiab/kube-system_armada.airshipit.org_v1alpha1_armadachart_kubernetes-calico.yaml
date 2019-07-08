@@ -1,0 +1,93 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-calico
+  name: kubernetes-calico
+  namespace: kube-system
+spec:
+  chart_name: calico
+  dependencies:
+  - calico-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-calico
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 9efb353b83c59e891b1b85dc6567044de0f5ac17
+    subpath: calico
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-calico
+        type: job
+  values:
+    conf:
+      cni_network_config:
+        cniVersion: 0.3.0
+        name: k8s-pod-network
+        plugins:
+        - etcd_ca_cert_file: /etc/calico/pki/ca
+          etcd_cert_file: /etc/calico/pki/crt
+          etcd_endpoints: __ETCD_ENDPOINTS__
+          etcd_key_file: /etc/calico/pki/key
+          ipam:
+            type: calico-ipam
+          kubernetes:
+            kubeconfig: __KUBECONFIG_FILEPATH__
+          log_level: info
+          policy:
+            type: k8s
+          type: calico
+        - capabilities:
+            portMappings: true
+          snat: true
+          type: portmap
+      controllers:
+        K8S_API: https://10.96.0.1:443
+      node:
+        CALICO_STARTUP_LOGLEVEL: INFO
+        CLUSTER_TYPE: k8s,bgp
+        ETCD_CA_CERT_FILE: /etc/calico/pki/ca
+        ETCD_CERT_FILE: /etc/calico/pki/crt
+        ETCD_KEY_FILE: /etc/calico/pki/key
+        IP_AUTODETECTION_METHOD: interface=ens3
+        WAIT_FOR_STORAGE: "true"
+    endpoints:
+      etcd:
+        auth:
+          client:
+            tls:
+              ca: $(DeckhandCertificateAuthority.calico-etcd.spec)
+              crt: $(DeckhandCertificate.calico-node.spec)
+              key: $(DeckhandCertificateKey.calico-node.spec)
+        host_fqdn_override:
+          default: 10.96.232.136
+        hosts:
+          default: calico-etcd
+        scheme:
+          default: https
+    images:
+      tags: {}
+    manifests:
+      daemonset_calico_etcd: false
+      job_image_repo_sync: false
+      service_calico_etcd: false
+    networking:
+      mtu: 1500
+      podSubnet: 10.97.0.0/16
+      settings:
+        ippool:
+          disabled: "false"
+          ipip:
+            enabled: "true"
+            mode: Always
+          nat_outgoing: "true"
+        mesh: "on"
+  wait:
+    labels:
+      release_group: airship-kubernetes-calico
+    timeout: 600

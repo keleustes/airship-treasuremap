@@ -1,0 +1,62 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-postgresql
+  name: ucp-postgresql
+  namespace: ucp
+spec:
+  chart_name: ucp-postgresql
+  dependencies:
+  - postgres-htk
+  install:
+    no_hooks: false
+  release: ucp-postgresql
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.postgresql)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-ucp-postgresql
+        type: job
+  values:
+    conf:
+      postgresql:
+        max_connections: 1000
+        shared_buffers: 2GB
+    development:
+      enabled: false
+    endpoints:
+      postgresql:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.ucp-service-accounts.spec.ucp.postgres.admin)
+            password: $(DeckhandPassphrase.ucp-postgres-admin-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ucp.postgresql)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ucp.postgresql)
+    labels:
+      server:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-ucp-postgresql
+    timeout: 600
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: postgres-htk
+  namespace: pegleg
+spec:
+  chart_name: postgres-htk
+  dependencies: []
+  release: postgres-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.postgresql-htk)
+  values: {}

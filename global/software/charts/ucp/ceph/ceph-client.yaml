@@ -1,0 +1,70 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-client
+  name: ucp-ceph-client
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-client
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: ucp-ceph-client
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.ceph-client)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-ceph-client
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: $(DeckhandPassphrase.ceph-fsid.spec)
+          osd_pool_default_size: 1
+      pool:
+        crush:
+          tunables: hammer
+        default:
+          crush_rule: same_host
+        target:
+          osd: 1
+          pg_per_osd: 100
+          protected: true
+    deployment:
+      ceph: true
+    endpoints:
+      ceph_mgr: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.ceph_mgr)
+      ceph_mon: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.ceph_mon)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ceph.ceph-client)
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      mds:
+        node_selector_key: ceph-mds
+        node_selector_value: enabled
+      mgr:
+        node_selector_key: ceph-mgr
+        node_selector_value: enabled
+    network:
+      cluster: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.cluster_cidr)
+      public: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.public_cidr)
+    pod:
+      replicas:
+        mds: 1
+        mgr: 1
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-client
+    timeout: 900

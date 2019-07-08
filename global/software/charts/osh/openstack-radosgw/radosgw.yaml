@@ -1,0 +1,71 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: tenant-ceph-rgw
+  namespace: tenant-ceph
+spec:
+  chart_name: tenant-ceph-rgw
+  dependencies:
+  - tenant-ceph-htk
+  install:
+    no_hooks: false
+  release: tenant-ceph-rgw
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.tenant-ceph-rgw)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-tenant-ceph-rgw
+        type: job
+  values:
+    bootstrap:
+      enabled: false
+    ceph_client:
+      configmap: tenant-ceph-etc
+    conf:
+      config:
+        rgw_keystone_token_cache_size: '0'
+      rgw_ks:
+        enabled: true
+    deployment:
+      ceph: true
+      cephfs_provisioner: false
+      client_secrets: false
+      rbd_provisioner: false
+      rgw_keystone_user_and_endpoints: true
+    endpoints:
+      ceph_mon: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.tenant_ceph_mon)
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.admin)
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+          swift:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.swift.keystone)
+            password: $(DeckhandPassphrase.ceph-swift-keystone-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+      object_store: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.object_store)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ceph.tenant-ceph-rgw)
+    labels:
+      job:
+        node_selector_key: tenant-ceph-control-plane
+        node_selector_value: enabled
+      rgw:
+        node_selector_key: tenant-ceph-rgw
+        node_selector_value: enabled
+    network:
+      cluster: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.cluster_cidr)
+      public: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.public_cidr)
+    pod:
+      replicas:
+        rgw: 2
+    secrets:
+      keyrings:
+        admin: pvc-tceph-client-key
+  wait:
+    labels:
+      release_group: airship-tenant-ceph-rgw
+    timeout: 900

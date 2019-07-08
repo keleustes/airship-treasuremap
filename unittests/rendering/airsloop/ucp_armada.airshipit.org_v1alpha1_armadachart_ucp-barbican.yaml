@@ -1,0 +1,225 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-barbican
+  name: ucp-barbican
+  namespace: ucp
+spec:
+  chart_name: ucp-barbican
+  dependencies:
+  - ucp-barbican-htk
+  install:
+    no_hooks: false
+  release: ucp-barbican
+  source:
+    location: https://opendev.org/openstack/openstack-helm
+    reference: 0e1c296101ffc19fae4ec5851b786ad33cd00f41
+    subpath: barbican
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-barbican
+        type: job
+  values:
+    conf:
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('ucp.barbican', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - "null"
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_barbican:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: barbican
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - barbican
+    endpoints:
+      fluentd:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: fluentd-logging
+        name: fluentd
+        namespace: osh-infra
+        path:
+          default: ""
+        port:
+          metrics:
+            default: 24220
+          service:
+            default: 24224
+        scheme:
+          default: http
+      identity:
+        auth:
+          admin:
+            password: airsloop123
+            project_domain_name: default
+            project_name: admin
+            region_name: RegionOne
+            user_domain_name: default
+            username: admin
+          barbican:
+            password: airsloop123
+            project_domain_name: default
+            project_name: service
+            region_name: RegionOne
+            role: admin
+            user_domain_name: default
+            username: barbican
+        host_fqdn_override:
+          default: ""
+        name: keystone
+        namespace: ucp
+        path:
+          default: /v3
+        port:
+          api:
+            default: 80
+            internal: 5000
+        scheme:
+          default: http
+          internal: http
+      key_manager:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: barbican-api
+          public: barbican
+        name: barbican
+        path:
+          default: ""
+        port:
+          api:
+            default: 9311
+            public: 80
+        scheme:
+          default: http
+      oslo_cache:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: memcached
+        port:
+          memcache:
+            default: 11211
+      oslo_db:
+        auth:
+          admin:
+            password: airsloop123
+          barbican:
+            database: barbican
+            password: airsloop123
+            username: barbican
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+          discovery: mariadb-discovery
+        path: /barbican
+        port:
+          mysql:
+            default: 3306
+          wsrep:
+            default: 4567
+        scheme: mysql+pymysql
+      oslo_messaging:
+        auth:
+          admin:
+            password: airsloop123
+            username: rabbitmq
+          barbican:
+            password: airsloop123
+          keystone:
+            username: keystone
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: rabbitmq
+        namespace: null
+        path: /keystone
+        port:
+          amqp:
+            default: 5672
+        scheme: rabbit
+    images:
+      tags: {}
+    labels:
+      api:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      test:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api: 1
+  wait:
+    labels:
+      release_group: airship-ucp-barbican
+    timeout: 300

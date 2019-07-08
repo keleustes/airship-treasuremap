@@ -1,0 +1,56 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../global
+- ./network/KubernetesNetwork.yaml
+- ./config/endpoints.yaml
+- ./config/service_accounts.yaml
+
+patchesStrategicMerge:
+- ./charts/kubernetes/ingress/ingress.yaml
+- ./charts/osh/ceph/ceph-client.yaml
+- ./charts/osh/ceph/ceph-ingress.yaml
+- ./charts/osh/ceph/ceph-osd.yaml
+- ./charts/osh/comps/cinder-rabbitmq.yaml
+- ./charts/osh/comps/cinder.yaml
+- ./charts/osh/comps/glance-rabbitmq.yaml
+- ./charts/osh/comps/glance.yaml
+- ./charts/osh/comps/heat-rabbitmq.yaml
+- ./charts/osh/comps/heat.yaml
+- ./charts/osh/comps/horizon.yaml
+- ./charts/osh/comps/ingress.yaml
+- ./charts/osh/comps/keystone-rabbitmq.yaml
+- ./charts/osh/comps/keystone.yaml
+- ./charts/osh/comps/mariadb.yaml
+- ./charts/osh/comps/neutron-rabbitmq.yaml
+- ./charts/osh/comps/neutron.yaml
+- ./charts/osh/comps/nova-rabbitmq.yaml
+- ./charts/osh/comps/nova.yaml
+- ./charts/osh-infra/elasticsearch.yaml
+- ./charts/osh-infra/fluentbit.yaml
+- ./charts/osh-infra/fluentd.yaml
+- ./charts/osh-infra/grafana.yaml
+- ./charts/osh-infra/ingress.yaml
+- ./charts/osh-infra/mariadb.yaml
+- ./charts/osh-infra/prometheus.yaml
+- ./charts/ucp/ceph/ceph-client.yaml
+- ./charts/ucp/ceph/ceph-ingress.yaml
+- ./charts/ucp/ceph/ceph-osd.yaml
+- ./charts/ucp/ceph/ceph-provisioners.yaml
+- ./charts/ucp/comps/armada.yaml
+- ./charts/ucp/comps/barbican.yaml
+- ./charts/ucp/comps/deckhand.yaml
+- ./charts/ucp/comps/drydock.yaml
+- ./charts/ucp/comps/keystone.yaml
+- ./charts/ucp/comps/maas.yaml
+- ./charts/ucp/comps/promenade.yaml
+- ./charts/ucp/comps/shipyard.yaml
+- ./charts/ucp/core/ingress.yaml
+- ./charts/ucp/core/mariadb.yaml
+- ./charts/ucp/core/rabbitmq.yaml
+- ./manifests/bootstrap.yaml
+- ./manifests/full-site.yaml
+
+vars:

@@ -1,0 +1,11 @@
+apiVersion: promenade.airshipit.org/v1alpha1
+kind: PromenadeDocker
+metadata:
+  labels:
+    promenade: enabled
+  name: docker
+  namespace: drydock
+spec:
+  config:
+    live-restore: true
+    storage-driver: overlay2

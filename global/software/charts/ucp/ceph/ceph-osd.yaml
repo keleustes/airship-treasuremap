@@ -1,0 +1,52 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-osd
+  name: ucp-ceph-osd
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-osd
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: ucp-ceph-osd
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.ucp.ceph-osd)
+  upgrade:
+    no_hooks: false
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: $(DeckhandPassphrase.ceph-fsid.spec)
+      osd:
+        osd_crush_chooseleaf_type: 0
+      storage:
+        osd:
+        - data:
+            location: /var/lib/openstack-helm/ceph/osd/osd-one
+            type: directory
+          journal:
+            location: /var/lib/openstack-helm/ceph/osd/journal-one
+            type: directory
+    endpoints:
+      ceph_mon: $(PeglegEndpointCatalogue.ucp-endpoints.spec.ceph.ceph_mon)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.ceph.ceph-osd)
+    labels:
+      osd:
+        node_selector_key: ceph-osd
+        node_selector_value: enabled
+    network:
+      cluster: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.cluster_cidr)
+      public: $(PeglegCommonAddresses.common-addresses.spec.storage.ceph.public_cidr)
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-osd
+    timeout: 900

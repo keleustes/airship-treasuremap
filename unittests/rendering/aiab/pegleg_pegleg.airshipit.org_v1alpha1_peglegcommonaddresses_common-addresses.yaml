@@ -1,0 +1,61 @@
+apiVersion: pegleg.airshipit.org/v1alpha1
+kind: PeglegCommonAddresses
+metadata:
+  name: common-addresses
+  namespace: pegleg
+spec:
+  bootstrap:
+    ip: 10.0.2.14
+  calico:
+    etcd:
+      service_ip: 10.96.232.136
+    ip_autodetection_method: interface=ens3
+  dns:
+    cluster_domain: cluster.local
+    service_ip: 10.96.0.10
+    upstream_servers:
+    - 8.8.8.8
+    - 8.8.4.4
+    - 208.67.222.222
+    upstream_servers_joined: 8.8.8.8,8.8.4.4,208.67.222.222
+  etcd:
+    container_port: 2379
+    haproxy_port: 2378
+  genesis:
+    hostname: aiab
+    ip: 10.0.2.14
+  kubernetes:
+    api_service_ip: 10.96.0.1
+    apiserver_port: 6443
+    etcd_service_ip: 10.96.0.2
+    haproxy_port: 6553
+    pod_cidr: 10.97.0.0/16
+    service_cidr: 10.96.0.0/16
+    service_node_port_range: 30000-32767
+  ldap:
+    auth_path: DC=test,DC=test,DC=com?sAMAccountName?sub?memberof=CN=test,OU=Application,OU=Groups,DC=test,DC=test,DC=com
+    base_url: ldap.example.com
+    common_name: test
+    domain: example
+    subdomain: test
+    url: ldap://ldap.example.com
+  neutron:
+    external_iface: docker0
+    tunnel_device: docker0
+  node_ports:
+    drydock_api: 30000
+    maas_api: 30001
+    maas_proxy: 31800
+  ntp:
+    servers_joined: 0.ubuntu.pool.ntp.org,1.ubuntu.pool.ntp.org,2.ubuntu.pool.ntp.org,4.ubuntu.pool.ntp.org
+  openvswitch:
+    external_iface: docker0
+  proxy:
+    http: ""
+    https: ""
+    no_proxy:
+    - 127.0.0.1
+  storage:
+    ceph:
+      cluster_cidr: 10.0.2.0/24
+      public_cidr: 10.0.2.0/24

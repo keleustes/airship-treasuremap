@@ -1,0 +1,13 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: keystone
+  name: keystone
+  namespace: openstack
+spec:
+  values:
+    pod:
+      replicas:
+        api: 1

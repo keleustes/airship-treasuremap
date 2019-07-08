@@ -1,0 +1,54 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: ingress
+    name: openstack-ingress-controller
+  name: openstack-ingress-controller
+  namespace: openstack
+spec:
+  chart_name: openstack-ingress-controller
+  dependencies:
+  - ingress-htk
+  install:
+    no_hooks: false
+  release: openstack-ingress-controller
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.ingress)
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-openstack-ingress-controller
+        type: job
+  values:
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.ingress)
+    labels:
+      error_server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        error_page: 2
+        ingress: 2
+  wait:
+    labels:
+      release_group: airship-openstack-ingress-controller
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: ingress-htk
+  namespace: pegleg
+spec:
+  chart_name: ingress-htk
+  dependencies: []
+  release: ingress-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.ingress-htk)
+  values: {}

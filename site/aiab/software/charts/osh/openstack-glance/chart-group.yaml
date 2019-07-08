@@ -1,0 +1,10 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: openstack-glance
+  namespace: shipyard
+spec:
+  chart_group:
+  - glance-rabbitmq
+  - glance

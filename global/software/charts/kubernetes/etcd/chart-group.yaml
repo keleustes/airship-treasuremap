@@ -1,0 +1,10 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  name: kubernetes-etcd
+  namespace: shipyard
+spec:
+  chart_group:
+  - kubernetes-etcd
+  description: Kubernetes etcd

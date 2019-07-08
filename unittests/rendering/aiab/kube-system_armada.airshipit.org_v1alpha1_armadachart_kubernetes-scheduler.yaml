@@ -1,0 +1,42 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: kubernetes-scheduler
+  name: kubernetes-scheduler
+  namespace: kube-system
+spec:
+  chart_name: scheduler
+  dependencies:
+  - kubernetes-scheduler-htk
+  protected:
+    continue_processing: true
+  release: kubernetes-scheduler
+  source:
+    location: https://opendev.org/airship/promenade
+    reference: 44b5fae04788c6a28de0f9a2e132204561474d47
+    subpath: charts/scheduler
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-kubernetes-scheduler
+        type: job
+  values:
+    images:
+      tags:
+        anchor: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+        scheduler: gcr.io/google-containers/hyperkube-amd64:v1.11.6
+    network:
+      kubernetes_netloc: 127.0.0.1:6553
+    secrets:
+      tls:
+        ca: $(DeckhandCertificateAuthority.kubernetes.spec)
+        cert: $(DeckhandCertificate.scheduler.spec)
+        key: $(DeckhandCertificateKey.scheduler.spec)
+  wait:
+    labels:
+      release_group: airship-kubernetes-scheduler
+    timeout: 600

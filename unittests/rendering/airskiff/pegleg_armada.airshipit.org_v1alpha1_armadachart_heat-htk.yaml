@@ -1,0 +1,15 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: heat-htk
+  namespace: pegleg
+spec:
+  chart_name: heat-htk
+  dependencies: []
+  release: heat-htk
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 0714b9d7ae08a88565d2c81c1b185fd77efaafca
+    subpath: helm-toolkit
+    type: git
+  values: {}

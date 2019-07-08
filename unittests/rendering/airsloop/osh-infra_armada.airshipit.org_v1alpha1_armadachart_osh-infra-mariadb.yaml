@@ -1,0 +1,81 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: osh-infra-mariadb
+  name: osh-infra-mariadb
+  namespace: osh-infra
+spec:
+  chart_name: osh-infra-mariadb
+  dependencies:
+  - osh-helm-toolkit
+  install:
+    no_hooks: false
+  release: osh-infra-mariadb
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 0714b9d7ae08a88565d2c81c1b185fd77efaafca
+    subpath: mariadb
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-osh-infra-mariadb
+        type: job
+  values:
+    endpoints:
+      oslo_db:
+        auth:
+          admin:
+            password: airsloop123
+            username: root
+          exporter:
+            password: airsloop123
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mariadb
+        namespace: osh-infra
+        path: /DB_NAME
+        port:
+          mysql:
+            default: 3306
+        scheme: mysql+pymysql
+      prometheus_mysql_exporter:
+        auth:
+          user:
+            username: osh-infra-oslodb-exporter
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: mysql-exporter
+        namespace: osh-infra
+        path:
+          default: /metrics
+        port:
+          metrics:
+            default: 9104
+        scheme:
+          default: http
+    images:
+      tags: {}
+    labels:
+      prometheus_mysql_exporter:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    monitoring:
+      prometheus:
+        enabled: true
+    pod:
+      replicas:
+        ingress: 1
+        server: 1
+  wait:
+    labels:
+      release_group: airship-osh-infra-mariadb
+    timeout: 900

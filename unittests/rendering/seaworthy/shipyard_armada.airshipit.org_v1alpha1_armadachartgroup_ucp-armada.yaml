@@ -1,0 +1,13 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChartGroup
+metadata:
+  labels:
+    name: ucp-armada-chart-group
+  name: ucp-armada
+  namespace: shipyard
+spec:
+  chart_group:
+  - ucp-tiller
+  - ucp-armada
+  description: Armada
+  sequenced: true

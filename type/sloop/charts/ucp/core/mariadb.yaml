@@ -1,0 +1,14 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-mariadb
+  name: ucp-mariadb
+  namespace: ucp
+spec:
+  values:
+    pod:
+      replicas:
+        ingress: 1
+        server: 1

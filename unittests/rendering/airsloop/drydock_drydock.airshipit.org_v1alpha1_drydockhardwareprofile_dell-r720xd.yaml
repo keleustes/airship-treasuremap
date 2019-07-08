@@ -1,0 +1,26 @@
+apiVersion: drydock.airshipit.org/v1alpha1
+kind: DrydockHardwareProfile
+metadata:
+  name: dell-r720xd
+  namespace: drydock
+spec:
+  bios_version: 2.2.3
+  boot_mode: bios
+  bootstrap_protocol: pxe
+  device_aliases:
+    bootdisk:
+      address: 0:2.0.0
+      bus_type: scsi
+      dev_type: PERC H710P
+    data_nic01:
+      address: "0000:43:00.0"
+      bus_type: pci
+      dev_type: Ethernet 10G 2P X520 Adapter
+    pxe_nic01:
+      address: "0000:01:00.0"
+      bus_type: pci
+      dev_type: I350 Gigabit Network Connection
+  generation: "8"
+  hw_version: "3"
+  pxe_interface: 0
+  vendor: DELL

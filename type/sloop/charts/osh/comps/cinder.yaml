@@ -1,0 +1,16 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: cinder
+  name: cinder
+  namespace: openstack
+spec:
+  values:
+    pod:
+      replicas:
+        api: 1
+        backup: 1
+        scheduler: 1
+        volume: 1

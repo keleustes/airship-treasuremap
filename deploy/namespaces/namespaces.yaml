@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ceph
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nfs
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openstack
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: osh-infra
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tenant-ceph
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ucp
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pegleg
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: shipyard
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: drydock

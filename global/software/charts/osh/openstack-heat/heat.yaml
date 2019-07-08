@@ -1,0 +1,177 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: heat
+    name: heat
+  name: heat
+  namespace: openstack
+spec:
+  chart_name: heat
+  dependencies:
+  - heat-htk
+  install:
+    no_hooks: false
+  release: heat
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.heat)
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      delete:
+      - labels:
+          release_group: airship-heat
+        type: job
+  values:
+    conf:
+      logging:
+        formatter_context:
+          class: oslo_log.formatters.ContextFormatter
+        formatter_default:
+          format: '%(message)s'
+        formatter_fluent:
+          class: oslo_log.formatters.FluentFormatter
+        formatters:
+          keys:
+          - context
+          - default
+          - fluent
+        handler_fluent:
+          args: ('openstack.heat', 'fluentd-logging.osh-infra', 24224)
+          class: fluent.handler.FluentHandler
+          formatter: fluent
+        handler_null:
+          args: ()
+          class: logging.NullHandler
+          formatter: default
+        handler_stderr:
+          args: (sys.stderr,)
+          class: StreamHandler
+          formatter: context
+        handler_stdout:
+          args: (sys.stdout,)
+          class: StreamHandler
+          formatter: context
+        handlers:
+          keys:
+          - stdout
+          - stderr
+          - 'null'
+          - fluent
+        logger_amqp:
+          handlers: stderr
+          level: WARNING
+          qualname: amqp
+        logger_amqplib:
+          handlers: stderr
+          level: WARNING
+          qualname: amqplib
+        logger_boto:
+          handlers: stderr
+          level: WARNING
+          qualname: boto
+        logger_eventletwsgi:
+          handlers: stderr
+          level: WARNING
+          qualname: eventlet.wsgi.server
+        logger_heat:
+          handlers:
+          - stdout
+          - fluent
+          level: INFO
+          qualname: heat
+        logger_root:
+          handlers: stdout
+          level: WARNING
+        logger_sqlalchemy:
+          handlers: stderr
+          level: WARNING
+          qualname: sqlalchemy
+        loggers:
+          keys:
+          - root
+          - heat
+    endpoints:
+      cloudformation: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.cloudformation)
+      cloudwatch: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.cloudwatch)
+      fluentd: $(PeglegEndpointCatalogue.osh-infra-endpoints.spec.osh_infra.fluentd)
+      identity:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.keystone.admin)
+            password: $(DeckhandPassphrase.osh-keystone-admin-password.spec)
+          heat:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.heat.heat)
+            password: $(DeckhandPassphrase.osh-heat-password.spec)
+          heat_stack_user:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.heat.heat_stack_user)
+            password: $(DeckhandPassphrase.osh-heat-stack-user-password.spec)
+          heat_trustee:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.heat.heat_trustee)
+            password: $(DeckhandPassphrase.osh-heat-trustee-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.identity)
+      orchestration: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.orchestration)
+      oslo_cache:
+        auth:
+          memcache_secret_key: $(DeckhandPassphrase.osh-oslo-cache-secret-key.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_cache)
+      oslo_db:
+        auth:
+          admin:
+            password: $(DeckhandPassphrase.osh-oslo-db-admin-password.spec)
+          heat:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.heat.oslo_db)
+            password: $(DeckhandPassphrase.osh-heat-oslo-db-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.oslo_db)
+        path: /$(PeglegAccountCatalogue.osh-service-accounts.spec.osh.heat.oslo_db.database)
+      oslo_messaging:
+        auth:
+          admin:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.heat.oslo_messaging.admin)
+            password: $(DeckhandPassphrase.osh-heat-oslo-messaging-admin-password.spec)
+          heat:
+            parent-inline: $(PeglegAccountCatalogue.osh-service-accounts.spec.osh.heat.oslo_messaging.heat)
+            password: $(DeckhandPassphrase.osh-heat-oslo-messaging-password.spec)
+        parent-inline: $(PeglegEndpointCatalogue.osh-endpoints.spec.osh.heat_oslo_messaging)
+    images:
+      tags: $(PeglegSoftwareVersions.software-versions.spec.images.osh.heat)
+    labels:
+      api:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      cfn:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      cloudwatch:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      engine:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        api: 2
+        cfn: 2
+        cloudwatch: 2
+        engine: 4
+  wait:
+    labels:
+      release_group: airship-heat
+    timeout: 900
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: heat-htk
+  namespace: pegleg
+spec:
+  chart_name: heat-htk
+  dependencies: []
+  release: heat-htk
+  source: $(PeglegSoftwareVersions.software-versions.spec.charts.osh.heat-htk)
+  values: {}

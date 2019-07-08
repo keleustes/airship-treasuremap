@@ -1,0 +1,65 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    name: ucp-ceph-mon
+  name: ucp-ceph-mon
+  namespace: ceph
+spec:
+  chart_name: ucp-ceph-mon
+  dependencies:
+  - ceph-htk
+  install:
+    no_hooks: false
+  protected:
+    continue_processing: true
+  release: ucp-ceph-mon
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 20f4274aeec1a0d826dc43c191b56c67de06781a
+    subpath: ceph-mon
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-ucp-ceph-mon
+        type: job
+  values:
+    bootstrap:
+      enabled: true
+    conf:
+      ceph:
+        global:
+          fsid: 7b7576f4-3358-4668-9112-100440079807
+    deployment:
+      ceph: true
+      storage_secrets: true
+    endpoints:
+      ceph_mon:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: ceph-mon
+          discovery: ceph-mon-discovery
+        namespace: ceph
+        port:
+          mon:
+            default: 6789
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: ucp-control-plane
+        node_selector_value: enabled
+      mon:
+        node_selector_key: ceph-mon
+        node_selector_value: enabled
+    network:
+      cluster: 10.23.23.0/24
+      public: 10.23.23.0/24
+  wait:
+    labels:
+      release_group: airship-ucp-ceph-mon
+    timeout: 1800

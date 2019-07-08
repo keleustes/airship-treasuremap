@@ -1,0 +1,45 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  labels:
+    component: ingress
+    name: openstack-ingress-controller
+  name: openstack-ingress-controller
+  namespace: openstack
+spec:
+  chart_name: openstack-ingress-controller
+  dependencies:
+  - ingress-htk
+  install:
+    no_hooks: false
+  release: openstack-ingress-controller
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 596732f16bf7cfe681ce0bb2d62e529bea5eea82
+    subpath: ingress
+    type: git
+  upgrade:
+    no_hooks: false
+    pre:
+      delete:
+      - labels:
+          release_group: airship-openstack-ingress-controller
+        type: job
+  values:
+    images:
+      tags: {}
+    labels:
+      error_server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      server:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+    pod:
+      replicas:
+        error_page: 2
+        ingress: 2
+  wait:
+    labels:
+      release_group: airship-openstack-ingress-controller
+    timeout: 900

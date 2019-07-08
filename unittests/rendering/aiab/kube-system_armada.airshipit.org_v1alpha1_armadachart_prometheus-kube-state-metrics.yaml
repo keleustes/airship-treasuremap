@@ -1,0 +1,65 @@
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: prometheus-kube-state-metrics
+  namespace: kube-system
+spec:
+  chart_name: prometheus-kube-state-metrics
+  dependencies:
+  - osh-infra-helm-toolkit
+  install:
+    no_hooks: false
+  release: prometheus-kube-state-metrics
+  source:
+    location: https://opendev.org/openstack/openstack-helm-infra
+    reference: 5e1ecd9840397bf9e8829ce0d98fcb721db1b74e
+    subpath: prometheus-kube-state-metrics
+    type: git
+  upgrade:
+    no_hooks: false
+    post:
+      create: []
+    pre:
+      create: []
+      delete:
+      - labels:
+          release_group: airship-prometheus-kube-state-metrics
+        type: job
+  values:
+    endpoints:
+      kube_controller_manager:
+        path:
+          default: /metrics
+        scheme:
+          default: http
+      kube_scheduler:
+        path:
+          default: /metrics
+        scheme:
+          default: http
+      kube_state_metrics:
+        host_fqdn_override:
+          default: ""
+        hosts:
+          default: kube-state-metrics
+        namespace: kube-system
+        path:
+          default: ""
+        port:
+          http:
+            default: 8080
+        scheme:
+          default: http
+    images:
+      tags: {}
+    labels:
+      job:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+      kube_state_metrics:
+        node_selector_key: openstack-control-plane
+        node_selector_value: enabled
+  wait:
+    labels:
+      release_group: airship-prometheus-kube-state-metrics
+    timeout: 900

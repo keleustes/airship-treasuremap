@@ -1,0 +1,8 @@
+apiVersion: shipyard.airshipit.org/v1alpha1
+kind: ShipyardDeploymentConfiguration
+metadata:
+  name: deployment-configuration
+  namespace: shipyard
+spec:
+  armada:
+    manifest: full-site

@@ -1,0 +1,41 @@
+---
+apiVersion: armada.airshipit.org/v1alpha1
+kind: ArmadaChart
+metadata:
+  name: kubernetes-calico-etcd
+  namespace: kube-system
+spec:
+  values:
+    nodes:
+    - name: $(PeglegCommonAddresses.common-addresses.spec.genesis.hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.calico-etcd-cab23-r720-11.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-cab23-r720-11.spec)
+        peer:
+          cert: $(DeckhandCertificate.calico-etcd-cab23-r720-11-peer.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-cab23-r720-11-peer.spec)
+    - name: $(PeglegCommonAddresses.common-addresses.spec.masters[0].hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.calico-etcd-cab23-r720-12.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-cab23-r720-12.spec)
+        peer:
+          cert: $(DeckhandCertificate.calico-etcd-cab23-r720-12-peer.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-cab23-r720-12-peer.spec)
+    - name: $(PeglegCommonAddresses.common-addresses.spec.masters[1].hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.calico-etcd-cab23-r720-13.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-cab23-r720-13.spec)
+        peer:
+          cert: $(DeckhandCertificate.calico-etcd-cab23-r720-13-peer.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-cab23-r720-13-peer.spec)
+    - name: $(PeglegCommonAddresses.common-addresses.spec.masters[2].hostname)
+      tls:
+        client:
+          cert: $(DeckhandCertificate.calico-etcd-cab23-r720-14.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-cab23-r720-14.spec)
+        peer:
+          cert: $(DeckhandCertificate.calico-etcd-cab23-r720-14-peer.spec)
+          key: $(DeckhandCertificateKey.calico-etcd-cab23-r720-14-peer.spec)
